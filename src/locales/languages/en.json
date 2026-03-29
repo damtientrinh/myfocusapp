@@ -1,0 +1,59 @@
+{
+  "layout": {
+    "tasks": "Tasks",
+    "stats": "Stats",
+    "settings": "Settings"
+  },
+  "pomodoro": {
+    "start": "START",
+    "pause": "PAUSE",
+    "reset": "RESET",
+    "modes": {
+      "work": "Focus",
+      "short_break": "Short Break",
+      "long_break": "Long Break"
+    },
+    "sessions": "Sessions: {{count}}",
+    "more_to_long": "{{count}} more until long break",
+    "working_on": "🚀 Focus on: {{task}}",
+    "finish_task": "Finish Task",
+    "congrats": "Awesome! You've reached your goal. 🎉",
+    "work_done": "Session Finished! 🎉",
+    "work_body": "Time for a little break.",
+    "break_done": "Break is over!",
+    "break_body": "Let's start a new session.",
+    "finish_title": "Task Completed!",
+    "finish_body": "You've finished this task perfectly."
+  },
+  "tasks": {
+    "header": "Daily Tasks",
+    "placeholder": "Task notes...",
+    "empty_title": "No tasks yet",
+    "empty_subtitle": "Add a task to start your day!",
+    "focus": "Focus",
+    "toast_added": "🚀 Task added!",
+    "toast_completed": "✅ Great! Done.",
+    "delete_focus_title": "Active Task! 🎯",
+    "delete_focus_msg": "You are focusing on this task. Deleting it will stop the current session. Are you sure?"
+  },
+  "settings": {
+    "header": "Settings",
+    "sections": {
+      "pomodoro": "POMODORO",
+      "appearance": "APPEARANCE"
+    },
+    "work_time": "Work Duration",
+    "minutes": "mins",
+    "dark_mode": "Dark Mode",
+    "light_mode": "Light Mode",
+    "language": "Language",
+    "reset_settings": "Reset Settings",
+    "version": "Version 1.0.0 • made with ❤️ by DTT",
+    "logout_title": "Log out"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete"
+  }
+}

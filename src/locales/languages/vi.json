@@ -1,0 +1,97 @@
+{
+  "layout": {
+    "tasks": "Công việc",
+    "stats": "Thống kê",
+    "settings": "Cài đặt"
+  },
+
+
+  "pomodoro": {
+    "start": "BẮT ĐẦU",
+    "pause": "TẠM DỪNG",
+    "reset": "LÀM MỚI",
+    "modes": {
+      "work": "Tập trung",
+      "short_break": "Nghỉ ngắn",
+      "long_break": "Nghỉ dài"
+    },
+    "sessions": "Số phiên: {{count}}",
+    "more_to_long": "Còn {{count}} phiên tới nghỉ dài",
+    "working_on": "🚀 Đang làm: {{task}}",
+    "finish_task": "Xong việc này",
+    "congrats": "Tuyệt vời! Bạn đã hoàn thành mục tiêu. 🎉",
+    "work_done": "Hoàn thành phiên tập trung! 🎉",
+    "work_body": "Đã đến lúc nghỉ ngơi một chút rồi.",
+    "break_done": "Nghỉ ngơi xong rồi!",
+    "break_body": "Bắt đầu phiên làm việc mới thôi nào.",
+    "finish_title": "Hoàn thành công việc!",
+    "finish_body": "Bạn đã hoàn thành công việc này một cách xuất sắc."
+  },
+
+
+  "tasks": {
+    "header": "Công việc hàng ngày",
+    "placeholder": "Ghi chú công việc...",
+    "empty_title": "Chưa có công việc nào",
+    "empty_subtitle": "Hãy thêm công việc để bắt đầu ngày mới!",
+    "focus": "Tập trung",
+    "permission_denied": "Quyền thông báo bị từ chối",
+    "notif_title": "⏰ Đến giờ rồi!",
+    "notif_body": "Bạn có việc: {{task}}",
+    "toast_added": "🚀 Đã thêm công việc!",
+    "toast_completed": "✅ Tuyệt vời! Đã xong.",
+    "toast_restored": "⏳ Đã khôi phục nhắc nhở",
+    "toast_uncheck": "↩️ Đã bỏ tích",
+    "toast_deleted": "🗑️ Đã xóa công việc",
+    "delete_focus_title": "Task đang thực hiện! 🎯",
+    "delete_focus_msg": "Bạn đang tập trung cho công việc này. Xóa nó sẽ dừng phiên làm việc hiện tại. Bạn chắc chắn chứ?"
+  },
+
+
+  "stats": {
+    "header": "Thống kê 📊",
+    "productivity_chart": "Biểu đồ năng suất",
+    "task_details": "Chi tiết công việc",
+    "reset_button": "Làm mới",
+    "alert_title": "Xác nhận xóa 🗑️",
+    "alert_msg": "Bạn có chắc muốn xóa toàn bộ lịch sử công việc?"
+  },
+  "stat_cards": {
+    "total_pomodoros": "Tổng Cà chua",
+    "completed": "Đã xong",
+    "pending": "Đang thực hiện: ",
+    "tasks_unit": " công việc"
+  },
+  "task_details": {
+    "task_empty": "Hôm nay bạn chưa làm việc gì sao? Hãy bắt đầu ngay nhé!"
+  },
+
+
+  "settings": {
+    "header": "Cài đặt",
+    "sections": {
+      "pomodoro": "POMODORO",
+      "appearance": "GIAO DIỆN"
+    },
+    "work_time": "Thời gian làm việc",
+    "minutes": "phút",
+    "helper_text": "Thời gian sẽ áp dụng cho phiên mới.",
+    "dark_mode": "Chế độ tối",
+    "light_mode": "Chế độ sáng",
+    "language": "Ngôn ngữ",
+    "reset_settings": "Đặt lại cài đặt",
+    "reset_confirm": "Bạn có muốn đưa mọi cài đặt về mặc định không? (Danh sách công việc vẫn được giữ nguyên)",
+    "reset_success": "Đã đặt lại!",
+    "reset_success_msg": "Cài đặt của bạn đã trở về trạng thái ban đầu.",
+    "reset_button": "Cài lại",
+    "version": "Phiên bản 1.0.0 • được làm ❤️ bởi DTT",
+    "logout_title": "Đăng xuất"
+  },
+
+
+  "common": {
+    "cancel": "Huỷ",
+    "confirm": "Xác nhận",
+    "delete": "Xóa"
+  }
+}
