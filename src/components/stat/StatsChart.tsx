@@ -6,7 +6,10 @@ import { styles } from '../../styles/StatsStyles';
 
 const screenWidth = Dimensions.get('window').width;
 
-export const StatsChart = ({ taskList }: { taskList: any[] }) => {
+export const StatsChart = ({ taskList = [] }: { taskList: any[] }) => {
+  if (!taskList || taskList.length === 0) {
+    return "Chưa có dữ liệu";
+  }
   const { theme, isDarkMode } = useAppContext();
 
   // 1. Tạo mảng 7 ngày gần nhất (từ hôm nay lùi về sau)

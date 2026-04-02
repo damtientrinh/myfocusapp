@@ -5,11 +5,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 
-import { auth } from '../api/firebaseConfig';
 import { signOut } from 'firebase/auth';
+import { auth } from '../config/firebaseConfig';
 
-import { styles } from '@/styles/SettingsStyles'; 
 import { useAppContext } from '@/context/AppContext';
+import { styles } from '@/styles/SettingsStyles';
 
 export default function SettingScreen() {
   const { 

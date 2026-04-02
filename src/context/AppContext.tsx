@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import i18n from '@/locales/i18n';
 
 // Firebase
-import { db } from '@/api/firebaseConfig';
+import { db } from '@/config/firebaseConfig';
 import { 
   collection, doc, getDocs, increment, orderBy, 
   query, updateDoc, where, writeBatch, addDoc, deleteDoc, serverTimestamp 

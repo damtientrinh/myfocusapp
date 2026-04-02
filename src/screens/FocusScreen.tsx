@@ -6,7 +6,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 // Firebase
-import { db } from '@/api/firebaseConfig';
+import { db } from '@/config/firebaseConfig';
 import { addDoc, collection, doc, increment, serverTimestamp, updateDoc } from "firebase/firestore";
 
 // Context & Hooks

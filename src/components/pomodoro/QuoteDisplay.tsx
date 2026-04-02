@@ -14,7 +14,7 @@ interface Props {
   pomodoroCount: number;
 }
 
-export const QuoteDisplay = ({ mode }: Props) => {
+export const QuoteDisplay = ({ mode, pomodoroCount }: Props) => {
   const { fonts } = useAppContext();
   const opacity = useSharedValue(1);
   const [displayQuote, setDisplayQuote] = useState(getRandomQuote(mode)); // Khởi tạo trực tiếp để tránh null
@@ -42,7 +42,7 @@ export const QuoteDisplay = ({ mode }: Props) => {
         runOnJS(changeQuoteText)();
       }
     });
-  }, [mode]); 
+  }, [mode, pomodoroCount]); 
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,

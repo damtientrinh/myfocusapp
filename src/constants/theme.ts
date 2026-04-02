@@ -115,3 +115,20 @@ export const FontWeight = {
   bold: '700' as const,
   extraBold: '800' as const,
 };
+
+export const Shadows = {
+  light: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3, // Dành cho Android
+  },
+  dark: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
+  }
+};

@@ -1,16 +1,16 @@
-import { Task, useAppContext } from '../context/AppContext'; 
 import * as Haptics from 'expo-haptics';
 import * as Notifications from 'expo-notifications';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Keyboard } from 'react-native';
+import { Alert } from 'react-native';
+import { Task, useAppContext } from '../context/AppContext';
 
 // Import Firebase
-import { db } from '../api/firebaseConfig';
 import {
   addDoc, collection, deleteDoc, doc,
   serverTimestamp, updateDoc
 } from "firebase/firestore";
+import { db } from '../config/firebaseConfig';
 
 export const useTaskLogic = () => {
   const { 

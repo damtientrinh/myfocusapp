@@ -28,19 +28,20 @@ export const ModeSelector = ({ mode, changeMode, labels, accentColors = ['#FF512
   const { t } = useTranslation();
   const { fonts, isDarkMode } = useAppContext(); 
 
-  const indicatorStyle = useAnimatedStyle(() => {
-    const positions: Record<ModeType, number> = {
-      WORK: 0,
-      SHORT_BREAK: 1,
-      LONG_BREAK: 2,
-    };
+  const positions: Record<ModeType, number> = {
+    WORK: 0,
+    SHORT_BREAK: 1,
+    LONG_BREAK: 2,
+  };
 
+  // Đảm bảo tab không bị tràn khi trượt
+  const indicatorStyle = useAnimatedStyle(() => {
     return {
       transform: [
         { 
           translateX: withSpring(positions[mode] * TAB_WIDTH, { 
             damping: 20,
-            stiffness: 120,
+            stiffness: 150, 
           }) 
         }
       ],

@@ -27,14 +27,13 @@ export const TaskDetailList = ({ taskList, totalPomodoros }: TaskListProps) => {
 
   return (
     <>
-      {taskList.map(task => {
+      {taskList.map((task, index) => {
         // Tính phần trăm đóng góp của task này
         const percentage = totalPomodoros > 0 
-          ? ( (task.pomodoroCount || 0) / totalPomodoros ) * 100 
-          : 0;
+          ? ( (task.pomodoroCount || 0) / totalPomodoros ) * 100 : 0;
 
         return (
-          <View key={task.id} style={styles.taskRowContainer}>
+          <View key={task.id || `task-${index}`} style={styles.taskRowContainer}>
             <View style={styles.taskRow}>
               <Text style={[styles.taskName, { color: theme.text }]} numberOfLines={1}>
                 {task.text}

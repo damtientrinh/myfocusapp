@@ -42,6 +42,9 @@ export const QUOTES_DATA = {
     "Đừng để Stack Overflow làm hộ mọi việc, hãy tự tư duy! 🧠",
     "Viết code sạch, ngủ ngon giấc. ✨",
     "Chỉ 25 phút để biến Logic thành hiện thực. ⚡",
+    "Code này chạy được là do tổ độ, nhưng tập trung là do bạn! 🧘",
+    "Cố lên! Sắp tới lúc Merge Request không có Conflict rồi. 🌿",
+    "Một Pomodoro mỗi ngày, Bug tự khắc bay xa. 🐞",
   ],
   SHORT_BREAK: [
     "Làm tốt lắm! Uống một ngụm nước nhé. 💧",

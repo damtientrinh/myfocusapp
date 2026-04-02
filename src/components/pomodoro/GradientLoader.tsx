@@ -73,7 +73,7 @@ export const GradientLoader = ({ isActive, progress, colors }: Props) => {
         <Svg height="320" width="320" viewBox="0 0 100 100">
           <Defs>
             {/* Sử dụng ID duy nhất dựa trên màu để SVG cập nhật ngay lập tức */}
-            <LinearGradient id="gradDynamic" x1="0%" y1="0%" x2="100%" y2="0%">
+            <LinearGradient id={`grad-${mainColor}`} x1="0%" y1="0%" x2="100%" y2="0%">
               <Stop offset="0%" stopColor={mainColor} stopOpacity={1} />
               <Stop offset="50%" stopColor={accentColor} stopOpacity={0.9} />
               <Stop offset="100%" stopColor={mainColor} stopOpacity={1} />
@@ -91,7 +91,7 @@ export const GradientLoader = ({ isActive, progress, colors }: Props) => {
           {/* Vòng nền mờ (Track) */}
           <Circle
             cx="50" cy="50" r={radius}
-            stroke={mainColor}
+            stroke={`url(#grad-${mainColor})`}
             strokeWidth="2" 
             strokeOpacity={0.15}
             fill="transparent"
