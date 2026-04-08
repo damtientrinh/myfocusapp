@@ -14,14 +14,13 @@ const TAB_WIDTH = CONTAINER_WIDTH / 3;
 
 type ModeType = 'WORK' | 'SHORT_BREAK' | 'LONG_BREAK';
 
-// Đưa ra ngoài để tránh lỗi 'undefined' khi component re-render
 const MODES_LIST: ModeType[] = ['WORK', 'SHORT_BREAK', 'LONG_BREAK'];
 
 interface ModeProps {
   mode: ModeType; 
   changeMode: (m: ModeType) => void;
   labels?: Record<ModeType, string>;
-  accentColors?: [string, string]; // Thêm dấu ? để tránh lỗi nếu quên truyền
+  accentColors?: [string, string]; 
 }
 
 export const ModeSelector = ({ mode, changeMode, labels, accentColors = ['#FF512F', '#DD2476'] } : ModeProps) => {
@@ -34,7 +33,6 @@ export const ModeSelector = ({ mode, changeMode, labels, accentColors = ['#FF512
     LONG_BREAK: 2,
   };
 
-  // Đảm bảo tab không bị tràn khi trượt
   const indicatorStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -50,7 +48,6 @@ export const ModeSelector = ({ mode, changeMode, labels, accentColors = ['#FF512
 
   return (
     <View style={[styles.modeRow, { width: CONTAINER_WIDTH, overflow: 'hidden' }]}>
-      {/* Indicator trượt phía dưới */}
       <Animated.View style={[
         styles.activeIndicator, 
         indicatorStyle,
@@ -64,7 +61,6 @@ export const ModeSelector = ({ mode, changeMode, labels, accentColors = ['#FF512
         />
       </Animated.View>
 
-      {/* Dùng toán tử Optional Chaining để an toàn tuyệt đối */}
       {MODES_LIST?.map((m) => {
         const isActive = mode === m;
         return (

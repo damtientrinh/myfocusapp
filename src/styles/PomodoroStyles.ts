@@ -1,5 +1,5 @@
 import { StyleSheet, Dimensions, Platform } from 'react-native';
-import { Spacing, Fonts } from '../constants/theme'; 
+import { Spacing, Fonts, FontWeight, Shadows } from '../constants/theme'; 
 
 const { width } = Dimensions.get('window');
 
@@ -22,13 +22,13 @@ export const styles = StyleSheet.create({
     alignSelf: 'center',
     position: 'relative',
     overflow: 'hidden',
-    marginTop: Spacing.md,
+    marginTop: Spacing.xs,
     width: width * 0.9, 
   },
   activeIndicator: {
     position: 'absolute',
-    height: '80%', 
-    top: '10%',
+    height: '90%', 
+    top: '5%',
     backgroundColor: '#FFF', 
     borderRadius: 20,
     shadowColor: "#000",
@@ -69,7 +69,7 @@ export const styles = StyleSheet.create({
     borderRadius: 200,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.25)',
   },
@@ -77,7 +77,7 @@ export const styles = StyleSheet.create({
     fontSize: 80,
     color: '#FFF',
     fontFamily: Fonts.mono, 
-    fontWeight: '700',
+    fontWeight: FontWeight.semiBold,
     fontVariant: ['tabular-nums'],
   },
 
@@ -91,10 +91,10 @@ export const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 40,
+    paddingHorizontal: 20,
     paddingVertical: 15,
-    borderRadius: 30, // Bo tròn hoàn toàn
-    minWidth: 160,
+    borderRadius: 30, 
+    minWidth: 150,
     alignItems: 'center',
     justifyContent: 'center',
     // Đổ bóng cho nút (Shadow)
@@ -106,9 +106,9 @@ export const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 18,
-    fontWeight: '700', // Đậm hơn để dễ nhìn
-    letterSpacing: 1,  // Khoảng cách chữ rộng ra chút cho thoáng
-    textTransform: 'uppercase', // Viết hoa cho chuyên nghiệp
+    fontWeight: FontWeight.medium,
+    letterSpacing: 1, 
+    textTransform: 'uppercase', 
   },
 
   // 5. Khu vực Task đang chọn (Task Info Area)
@@ -116,7 +116,7 @@ export const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     gap: Spacing.sm,
-    minHeight: 80,
+    minHeight: 40,
   },
   activeTaskBadge: {
     paddingVertical: Spacing.sm,
@@ -156,19 +156,19 @@ export const styles = StyleSheet.create({
   statsText: {
     color: '#FFF',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: FontWeight.medium,
     fontFamily: Fonts.sans,
   },
   quoteContainer: {
-    paddingHorizontal: Spacing.xl,
-    marginTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingHorizontal: Spacing.xs,
+    marginTop: Platform.OS === 'ios' ? 20 : 0,
     alignItems: 'center',
   },
   quoteText: {
-    fontSize: 16,
+    fontSize: 14,
     fontStyle: 'italic',
     textAlign: 'center',
-    color: 'rgba(255, 255, 255, 0.95)',
+    color: 'rgba(255, 255, 255, 0.8)',
     fontFamily: Fonts.sans,
     lineHeight: 24,
   }

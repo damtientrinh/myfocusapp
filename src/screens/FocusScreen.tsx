@@ -21,6 +21,12 @@ import { ModeSelector } from '@/components/pomodoro/ModeSelector';
 import { QuoteDisplay } from '@/components/pomodoro/QuoteDisplay';
 import { styles } from '@/styles/PomodoroStyles';
 
+import { Colors } from '../constants/theme';
+
+import { useMusicPlayer } from '../hooks/useMusicPlayer';
+import { MusicControl } from '../components/common/MusicControl';
+
+
 export default function FocusScreen() {
   const { t } = useTranslation();
   const { selectedTaskId, isDarkMode, user, incrementTaskPomodoro } = useAppContext();
@@ -35,16 +41,25 @@ export default function FocusScreen() {
   const activeTask = useMemo(() => 
     taskList.find(t => t.id === selectedTaskId), [taskList, selectedTaskId]);
 
-  // 1. Logic màu sắc dạng Mảng [Màu chính, Màu phụ] để làm Gradient
+  const { isMuted, setIsMuted, nextTrack, currentTrackTitle } = useMusicPlayer(isActive);
+
+  // 1. Logic màu sắc dạng Mảng [Màu chính, Màu phụ] cho Gradient
   const modeColors: [string, string] = useMemo(() => {
-    if (mode === 'WORK') {
-      return isDarkMode ? ['#7F1D1D', '#B91C1C'] : ['#F55656', '#FF8A80'];
+    const theme = isDarkMode ? Colors.dark : Colors.light;
+
+    switch (mode) {
+      case 'WORK':
+        return [theme.primary, theme.accentGradient]; 
+
+      case 'SHORT_BREAK':
+        return [theme.secondary, theme.longBreakGradient];
+
+      case 'LONG_BREAK':
+        return [theme.longBreak, theme.primaryGradient];
+
+      default:
+        return [theme.primary, theme.accent];
     }
-    const isShort = mode === 'SHORT_BREAK';
-    if (isDarkMode) {
-      return isShort ? ['#064E3B', '#059669'] : ['#082063', '#1D4ED8'];
-    }
-    return isShort ? ['#4CAF50', '#81C784'] : ['#408ece', '#64B5F6']; 
   }, [mode, isDarkMode]);
 
   // Màu nền Container (Lấy màu đầu tiên trong mảng)
@@ -84,7 +99,6 @@ export default function FocusScreen() {
     <Animated.View style={[styles.container, animatedContainer]}>
       <QuoteDisplay mode={mode} pomodoroCount={pomodoroCount} />
       
-      {/* Cập nhật ModeSelector với màu accent */}
       <ModeSelector 
         mode={mode} 
         changeMode={changeMode} 
@@ -97,11 +111,11 @@ export default function FocusScreen() {
       />
       
       <View style={styles.circleContainer}>
-        {/* Cập nhật GradientLoader với mảng màu colors */}
         <GradientLoader 
           isActive={isActive} 
           progress={progress} 
           colors={modeColors} 
+          isDarkMode={isDarkMode}
         />
         <View style={[
           styles.innerCircle, 
@@ -119,7 +133,6 @@ export default function FocusScreen() {
             setIsActive(!isActive);
           }}
         >
-          {/* Chữ Start/Pause đổi màu theo Mode chính */}
           <Text style={[styles.buttonText, { color: modeColors[0] }]}>
             {isActive ? t('pomodoro.pause') : t('pomodoro.start')}
           </Text>
@@ -157,16 +170,27 @@ export default function FocusScreen() {
         )}
       </View>
 
-      <SuccessConfetti 
-        isActive={showConfetti} 
-        onAnimationEnd={() => setShowConfetti(false)} 
-      />
+      <View style={{ marginVertical: 15, alignItems: 'center' }}>
+        <MusicControl 
+          isMuted={isMuted}
+          setIsMuted={setIsMuted}
+          nextTrack={nextTrack}
+          title={currentTrackTitle}
+          isDarkMode={isDarkMode}
+          isActive={isActive}
+        />
+      </View>
 
       <View style={styles.statsContainer}>
         <Text style={styles.statsText}>
           {t('pomodoro.sessions', { count: pomodoroCount })}
         </Text>
       </View>
+
+      <SuccessConfetti 
+        isActive={showConfetti} 
+        onAnimationEnd={() => setShowConfetti(false)} 
+      />
     </Animated.View>
   );
 }

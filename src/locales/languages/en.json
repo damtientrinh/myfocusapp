@@ -1,9 +1,10 @@
 {
   "layout": {
     "tasks": "Tasks",
-    "stats": "Stats",
+    "stats": "Statistics",
     "settings": "Settings"
   },
+
   "pomodoro": {
     "start": "START",
     "pause": "PAUSE",
@@ -14,28 +15,56 @@
       "long_break": "Long Break"
     },
     "sessions": "Sessions: {{count}}",
-    "more_to_long": "{{count}} more until long break",
-    "working_on": "🚀 Focus on: {{task}}",
+    "more_to_long": "{{count}} sessions until long break",
+    "working_on": "🚀 Working on: {{task}}",
     "finish_task": "Finish Task",
-    "congrats": "Awesome! You've reached your goal. 🎉",
-    "work_done": "Session Finished! 🎉",
-    "work_body": "Time for a little break.",
+    "congrats": "Excellent! You've reached your goal. 🎉",
+    "work_done": "Focus session complete! 🎉",
+    "work_body": "It's time for a little break.",
     "break_done": "Break is over!",
-    "break_body": "Let's start a new session.",
+    "break_body": "Let's start a new focus session.",
     "finish_title": "Task Completed!",
-    "finish_body": "You've finished this task perfectly."
+    "finish_body": "You have completed this task excellently."
   },
+
   "tasks": {
     "header": "Daily Tasks",
-    "placeholder": "Task notes...",
+    "placeholder": "What's on your mind?...",
     "empty_title": "No tasks yet",
     "empty_subtitle": "Add a task to start your day!",
     "focus": "Focus",
+    "permission_denied": "Notification permission denied",
+    "notif_title": "⏰ Time's up!",
+    "notif_body": "Task: {{task}}",
     "toast_added": "🚀 Task added!",
-    "toast_completed": "✅ Great! Done.",
+    "toast_completed": "✅ Great job! Done.",
+    "toast_restored": "⏳ Reminder restored",
+    "toast_uncheck": "↩️ Task unchecked",
+    "toast_deleted": "🗑️ Task deleted",
     "delete_focus_title": "Active Task! 🎯",
     "delete_focus_msg": "You are focusing on this task. Deleting it will stop the current session. Are you sure?"
   },
+
+  "stats": {
+    "header": "Statistics 📊",
+    "productivity_chart": "Productivity Chart",
+    "task_details": "Task Details",
+    "reset_button": "Reset",
+    "alert_title": "Confirm Delete 🗑️",
+    "alert_msg": "Are you sure you want to delete all task history?"
+  },
+
+  "stat_cards": {
+    "total_pomodoros": "Total Pomodoros",
+    "completed": "Completed",
+    "pending": "Pending: ",
+    "tasks_unit": " tasks"
+  },
+
+  "task_details": {
+    "task_empty": "Haven't worked on anything today? Let's get started!"
+  },
+
   "settings": {
     "header": "Settings",
     "sections": {
@@ -44,13 +73,19 @@
     },
     "work_time": "Work Duration",
     "minutes": "mins",
+    "helper_text": "Time changes will apply to the next session.",
     "dark_mode": "Dark Mode",
     "light_mode": "Light Mode",
     "language": "Language",
     "reset_settings": "Reset Settings",
+    "reset_confirm": "Do you want to reset all settings to default? (Your tasks will be kept)",
+    "reset_success": "Reset successful!",
+    "reset_success_msg": "Your settings have been restored to default.",
+    "reset_button": "Reset",
     "version": "Version 1.0.0 • made with ❤️ by DTT",
-    "logout_title": "Log out"
+    "logout_title": "Logout"
   },
+
   "common": {
     "cancel": "Cancel",
     "confirm": "Confirm",

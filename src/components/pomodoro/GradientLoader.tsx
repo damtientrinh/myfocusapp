@@ -1,114 +1,132 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
-  Easing, useAnimatedProps, useAnimatedStyle, useSharedValue,
-  withRepeat, withTiming, cancelAnimation, withSequence,
-  interpolate,
+  Easing, interpolate,
+  useAnimatedProps,
+  useAnimatedStyle,
+  useDerivedValue,
+  useSharedValue, withRepeat,
+  withTiming
 } from 'react-native-reanimated';
-import Svg, { Circle, Defs, LinearGradient, Stop, RadialGradient, G } from 'react-native-svg';
+import Svg, { Circle, ClipPath, Defs, G, LinearGradient, Path, Stop } from 'react-native-svg';
+import { Shadows } from '../../constants/theme';
 
-// Đảm bảo khai báo cái này để không bị báo lỗi "doesn't exist"
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 interface Props {
-  progress: number;
+  progress: number; 
   isActive: boolean;
-  colors: [string, string]; // Nhận mảng màu [Màu chính, Màu phụ] từ FocusScreen
+  colors: [string, string];
+  isDarkMode: boolean;
 }
 
-export const GradientLoader = ({ isActive, progress, colors }: Props) => {
-  const rotation = useSharedValue(0);
-  const pulse = useSharedValue(1);
-  const radius = 45; 
-  const circumference = 2 * Math.PI * radius;
+export const GradientLoader = ({ isActive, progress, colors, isDarkMode }: Props) => {
+  const waveOffset1 = useSharedValue(0);
+  const waveOffset2 = useSharedValue(0);
+  const [mainColor, accentColor] = colors;
 
-  // Lấy màu từ mảng colors truyền xuống
-  const mainColor = colors[0];
-  const accentColor = colors[1];
+  const smoothLevel = useDerivedValue(() => {
+    const targetLevel = interpolate(progress, [0, 1], [88, 12]);
+    return withTiming(targetLevel, { duration: 1000, easing: Easing.linear });
+  });
 
   useEffect(() => {
-    if (isActive) {
-      rotation.value = withRepeat(
-        withTiming(1, { duration: 15000, easing: Easing.linear }), 
-        -1, 
-        false
-      );
-      pulse.value = withRepeat(
-        withSequence(
-          withTiming(1.05, { duration: 1500, easing: Easing.inOut(Easing.sin) }),
-          withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.sin) })
-        ),
-        -1,
-        true
-      );
-    } else {
-      cancelAnimation(rotation);
-      rotation.value = withTiming(0);
-      pulse.value = withTiming(1);
-    }
+    waveOffset1.value = withRepeat(
+      withTiming(1, { duration: 2500, easing: Easing.linear }),
+      -1, false
+    );
+    waveOffset2.value = withRepeat(
+      withTiming(1, { duration: 4000, easing: Easing.linear }),
+      -1, false
+    );
+  }, []);
+
+  const smoothWaveH = useDerivedValue(() => {
+    return withTiming(isActive ? 8 : 1, { duration: 1000 });
   }, [isActive]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { rotate: `${rotation.value * 360}deg` },
-      { scale: pulse.value }
-    ],
-    // Bóng đổ lấy theo màu chính của mode
-    shadowColor: mainColor,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: interpolate(pulse.value, [1, 1.05], [0.3, 0.8]),
-    shadowRadius: 20,
-  }));
-
-  const animatedCircleProps = useAnimatedProps(() => {
-    const offset = circumference * (1 - progress);
+  const createWaveProps = (offset: any, isReverse: boolean) => useAnimatedProps(() => {
+    const currentLevel = smoothLevel.value;
+    const waveH = smoothWaveH.value; 
+    
     return {
-      strokeDashoffset: withTiming(offset, { duration: 800 }), 
+      d: `
+        M-100 ${currentLevel}
+        C-70 ${currentLevel - waveH} -30 ${currentLevel + waveH} 0 ${currentLevel}
+        C30 ${currentLevel - waveH} 70 ${currentLevel + waveH} 100 ${currentLevel}
+        C130 ${currentLevel - waveH} 170 ${currentLevel + waveH} 200 ${currentLevel}
+        V105 H-100 Z
+      `,
+      transform: [
+        { translateX: interpolate(offset.value, [0, 1], isReverse ? [-100, 0] : [0, -100]) }
+      ]
     };
   });
 
+  const animatedProps1 = createWaveProps(waveOffset1, false);
+  const animatedProps2 = createWaveProps(waveOffset2, true);
+
+  const scale = useDerivedValue(() => {
+    return withTiming(isActive ? 1 : 0.95, { duration: 500 });
+  });
+
+  // Tạo animated style cho box
+  const animatedBoxStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: withTiming(isActive ? 1 : 0.8, { duration: 500 }), // Mờ đi tí khi pause
+  }));
+
   return (
     <View style={styles.container}>
-      <Animated.View style={[animatedStyle, styles.svgWrapper]}>
-        <Svg height="320" width="320" viewBox="0 0 100 100">
+      <Animated.View style={[styles.box, 
+        isDarkMode ? Shadows.dark : Shadows.light,
+        { shadowColor: colors[0] },
+        animatedBoxStyle
+      ]}>
+        <Svg height="100%" width="100%" viewBox="0 0 100 100">
           <Defs>
-            {/* Sử dụng ID duy nhất dựa trên màu để SVG cập nhật ngay lập tức */}
-            <LinearGradient id={`grad-${mainColor}`} x1="0%" y1="0%" x2="100%" y2="0%">
+            {/* Gradient nước: Màu sắc đặc và rực rỡ hơn */}
+            <LinearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
               <Stop offset="0%" stopColor={mainColor} stopOpacity={1} />
-              <Stop offset="50%" stopColor={accentColor} stopOpacity={0.9} />
-              <Stop offset="100%" stopColor={mainColor} stopOpacity={1} />
+              <Stop offset="100%" stopColor={accentColor} stopOpacity={1} />
             </LinearGradient>
-            
-            <RadialGradient id="glowDynamic" cx="50%" cy="50%" rx="50%" ry="50%">
-              <Stop offset="0%" stopColor={mainColor} stopOpacity={0.4} />
-              <Stop offset="100%" stopColor={mainColor} stopOpacity={0} />
-            </RadialGradient>
-          </Defs>
-          
-          {/* Lớp hào quang phía sau */}
-          <Circle cx="50" cy="50" r={radius + 4} fill="url(#glowDynamic)" opacity={isActive ? 0.6 : 0.2} />
 
-          {/* Vòng nền mờ (Track) */}
-          <Circle
-            cx="50" cy="50" r={radius}
-            stroke={`url(#grad-${mainColor})`}
-            strokeWidth="2" 
-            strokeOpacity={0.15}
-            fill="transparent"
+            <ClipPath id="clipCircle">
+              <Circle cx="50" cy="50" r="46" />
+            </ClipPath>
+          </Defs>
+
+          {/* 1. Viền hào quang Neon (Glow) */}
+          <Circle 
+            cx="50" cy="50" r="48" 
+            stroke={mainColor} strokeWidth="1.5" strokeOpacity={0.4} 
+            fill="none" 
           />
 
-          {/* Vòng tiến trình chính xoay theo kim đồng hồ từ đỉnh 12h */}
-          <G transform="rotate(-90 50 50)">
-            <AnimatedCircle
-              cx="50" cy="50" r={radius}
-              stroke="url(#gradDynamic)"
-              strokeWidth="5"
-              fill="transparent"
-              strokeLinecap="round"
-              strokeDasharray={`${circumference} ${circumference}`}
-              animatedProps={animatedCircleProps}
+          {/* 2. Nền quả cầu (Sâu hơn) */}
+          <Circle cx="50" cy="50" r="46" fill={mainColor} fillOpacity={0.1} />
+
+          <G clipPath="url(#clipCircle)">
+            {/* 3. Lớp sóng xa: Màu đặc nhưng đậm hơn chút để tạo khối */}
+            <AnimatedPath 
+              animatedProps={animatedProps2} 
+              fill={mainColor} 
+              fillOpacity={0.7} 
+            />
+            
+            {/* 4. Lớp sóng gần: Đặc hoàn toàn (Opacity 1) */}
+            <AnimatedPath 
+              animatedProps={animatedProps1} 
+              fill="url(#waterGrad)" 
             />
           </G>
+
+          {/* 5. Highlight viền kính (Giúp quả cầu rõ nét) */}
+          <Circle 
+            cx="50" cy="50" r="46" 
+            stroke="white" strokeWidth="1.25" strokeOpacity={0.8} 
+            fill="none" 
+          />
         </Svg>
       </Animated.View>
     </View>
@@ -117,16 +135,18 @@ export const GradientLoader = ({ isActive, progress, colors }: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
-    height: '100%',
+    zIndex: -1,
   },
-  svgWrapper: {
-    width: 300,
-    height: 300,
-    justifyContent: 'center',
-    alignItems: 'center',
+  box: {
+    width: 320,
+    height: 320,
+    // Hiệu ứng Neon 
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 10 },
+    // shadowOpacity: 0.5,
+    // shadowRadius: 30,
   }
 });

@@ -15,7 +15,7 @@ export default function StatsScreen() {
   const { taskList, clearAllTasks, theme, refreshTasks, isLoaded, loading } = useAppContext();
   const { t } = useTranslation();
 
-  // 1. Tối ưu tính toán Stats - Thêm xử lý lỗi dữ liệu null
+  // 1. Tối ưu tính toán Stats
   const stats = useMemo(() => {
     const safeList = taskList || [];
     const totalPomodoros = safeList.reduce((acc, t) => acc + (t.pomodoroCount || 0), 0);
