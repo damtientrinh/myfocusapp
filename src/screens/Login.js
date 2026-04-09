@@ -13,7 +13,7 @@ export default function Login() {
         <View style={styles.container}>
 
             <Text style={styles.logo}>🍅</Text>
-            <Text style={styles.appName}>MyFocus</Text>
+            <Text style={styles.appName}>Pomodo</Text>
 
             <View style={styles.card}>
                 <Text style={styles.title}>Đăng nhập</Text>
