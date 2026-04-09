@@ -20,80 +20,9 @@ export const styles = StyleSheet.create({
     paddingBottom: 20, 
   },
 
-  // --- Style cho Empty Task ---
-  empty_container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 50, // Dùng margin thay vì padding để đẩy nội dung xuống
-  },
-  iconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    paddingHorizontal: 40,
-    lineHeight: 20,
-  },
+  
 
-  // --- Style TaskItem ---
-  itemWrapper: {
-    marginVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#FF5252',
-    overflow: 'hidden',
-  },
-  deleteBackground: {
-    ...StyleSheet.absoluteFillObject,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingRight: 25,
-  },
-  taskItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#FF5252',
-    marginRight: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  completedText: {
-    textDecorationLine: 'line-through',
-    opacity: 0.5,
-  },
-  timeLabel: {
-    fontSize: 12,
-    marginTop: 4,
-  },
+  
 
   // --- QUAN TRỌNG: Style cho Input & Footer ---
   footerWrapper: {

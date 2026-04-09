@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { useAppContext } from '@/context/AppContext'; 
-import { styles } from '@/styles/PomodoroStyles';
+import { styles } from './styles';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CONTAINER_WIDTH = SCREEN_WIDTH * 0.9; 
@@ -45,6 +45,7 @@ export const ModeSelector = ({ mode, changeMode, labels, accentColors = ['#FF512
       ],
     };
   });
+
 
   return (
     <View style={[styles.modeRow, { width: CONTAINER_WIDTH, overflow: 'hidden' }]}>

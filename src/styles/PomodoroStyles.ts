@@ -13,47 +13,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
   },
 
-  // 2. Mode Selector (Thanh trượt chọn Work/Break)
-  modeRow: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.15)', 
-    borderRadius: 25,
-    height: 50,
-    alignSelf: 'center',
-    position: 'relative',
-    overflow: 'hidden',
-    marginTop: Spacing.xs,
-    width: width * 0.9, 
-  },
-  activeIndicator: {
-    position: 'absolute',
-    height: '90%', 
-    top: '5%',
-    backgroundColor: '#FFF', 
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  modeButton: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2, 
-  },
-  modeText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontFamily: Fonts.rounded,
-  },
-  modeTextActive: {
-    color: '#000', 
-    fontWeight: '700',
-  },
-
   // 3. Vòng tròn đồng hồ (Timer Circle)
   circleContainer: {
     width: width * 0.8,
@@ -72,6 +31,7 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.25)',
+    position: 'absolute',
   },
   timeText: {
     fontSize: 80,
@@ -145,31 +105,5 @@ export const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // 6. Thống kê & Quotes
-  statsContainer: {
-    backgroundColor: 'rgba(0,0,0,0.15)',
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    marginBottom: Platform.OS === 'ios' ? 20 : 10,
-  },
-  statsText: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: FontWeight.medium,
-    fontFamily: Fonts.sans,
-  },
-  quoteContainer: {
-    paddingHorizontal: Spacing.xs,
-    marginTop: Platform.OS === 'ios' ? 20 : 0,
-    alignItems: 'center',
-  },
-  quoteText: {
-    fontSize: 14,
-    fontStyle: 'italic',
-    textAlign: 'center',
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontFamily: Fonts.sans,
-    lineHeight: 24,
-  }
+  
 });

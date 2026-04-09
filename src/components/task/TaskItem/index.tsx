@@ -5,18 +5,16 @@ import { useTranslation } from 'react-i18next';
 import { Dimensions, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-  Extrapolation,
-  interpolate,
-  runOnJS,
-  useAnimatedReaction,
-  useAnimatedStyle,
-  useSharedValue,
+  Extrapolation, interpolate,
+  runOnJS, useAnimatedReaction,
+  useAnimatedStyle, useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 
-import { useAppContext } from '../../context/AppContext';
-import { useRouter } from 'expo-router';
-import { styles } from '../../styles/TaskStyles';
+import { useAppContext } from '../../../context/AppContext';
+import { RelativePathString, useRouter } from 'expo-router';
+import { styles } from './styles';
+
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TRANSLATE_X_THRESHOLD = -SCREEN_WIDTH * 0.3;
@@ -94,8 +92,12 @@ export const TaskItem = ({ task, onToggle, onDelete }: any) => {
     if (task.completed) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedTaskId(task.id);
-    router.push('/'); 
+    router.push({
+      pathname: '/' as RelativePathString,
+      params: { taskId: task.id }
+    }); 
   };
+
 
   return (
     <View style={[styles.itemWrapper, { marginBottom: spacing.sm }]}> 

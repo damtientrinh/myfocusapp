@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { Alert, ScrollView, Text, TouchableOpacity, View, ActivityIndicator, RefreshControl } from 'react-native';
+import React, { useCallback, useMemo } from 'react';
+import { ActivityIndicator, Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { StatCards } from '@/components/stat/StatCards';
 import { StatsChart } from '@/components/stat/StatsChart';
-import { styles } from '@/styles/StatsStyles';
 import { TaskDetailList } from '@/components/stat/TaskDetailList';
+import { styles } from '@/styles/StatsStyles';
 
 import { useAppContext } from '@/context/AppContext';
 import { useTranslation } from 'react-i18next';

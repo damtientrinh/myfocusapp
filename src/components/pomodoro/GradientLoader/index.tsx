@@ -9,7 +9,8 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated';
 import Svg, { Circle, ClipPath, Defs, G, LinearGradient, Path, Stop } from 'react-native-svg';
-import { Shadows } from '../../constants/theme';
+import { Shadows } from '../../../constants/theme';
+import { styles } from './styles';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -71,9 +72,23 @@ export const GradientLoader = ({ isActive, progress, colors, isDarkMode }: Props
   });
 
   // Tạo animated style cho box
+  const pulse = useSharedValue(1);
+  
+  useEffect(() => {
+    if (isActive) {
+      pulse.value = withRepeat(
+        withTiming(1.05, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+        -1,
+        true
+      );
+    } else {
+      pulse.value = withTiming(1);
+    }
+  }, [isActive]);
+
   const animatedBoxStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: withTiming(isActive ? 1 : 0.8, { duration: 500 }), // Mờ đi tí khi pause
+    transform: [{ scale: scale.value * pulse.value }],
+    opacity: withTiming(isActive ? 1 : 0.8),
   }));
 
   return (
@@ -99,7 +114,7 @@ export const GradientLoader = ({ isActive, progress, colors, isDarkMode }: Props
           {/* 1. Viền hào quang Neon (Glow) */}
           <Circle 
             cx="50" cy="50" r="48" 
-            stroke={mainColor} strokeWidth="1.5" strokeOpacity={0.4} 
+            stroke={mainColor} strokeWidth="1.5" strokeOpacity={0.3} 
             fill="none" 
           />
 
@@ -132,21 +147,3 @@ export const GradientLoader = ({ isActive, progress, colors, isDarkMode }: Props
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: -1,
-  },
-  box: {
-    width: 320,
-    height: 320,
-    // Hiệu ứng Neon 
-    // shadowColor: '#000',
-    // shadowOffset: { width: 0, height: 10 },
-    // shadowOpacity: 0.5,
-    // shadowRadius: 30,
-  }
-});

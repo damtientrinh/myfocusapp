@@ -18,13 +18,13 @@ import { useTaskLogic } from '../hooks/useTaskLogic';
 import { SuccessConfetti } from '@/components/common/SuccessConfetti';
 import { GradientLoader } from '@/components/pomodoro/GradientLoader';
 import { ModeSelector } from '@/components/pomodoro/ModeSelector';
-import { QuoteDisplay } from '@/components/pomodoro/QuoteDisplay';
+import { QuoteDisplay } from '@/components/pomodoro/Quotes';
 import { styles } from '@/styles/PomodoroStyles';
 
 import { Colors } from '../constants/theme';
 
-import { useMusicPlayer } from '../hooks/useMusicPlayer';
 import { MusicControl } from '../components/common/MusicControl';
+import { useMusicPlayer } from '../hooks/useMusicPlayer';
 
 
 export default function FocusScreen() {

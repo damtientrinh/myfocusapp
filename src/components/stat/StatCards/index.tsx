@@ -1,10 +1,10 @@
-import React from 'react';
-import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Text, View } from 'react-native';
 
 import { useAppContext } from '@/context/AppContext';
-import { styles } from '../../styles/StatsStyles';
+import { styles } from './styles';
 
 interface StatCardsProps {
   totalPomodoros: number;

@@ -1,19 +1,22 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  FlatList, Keyboard, Platform, Text, TextInput,
-  TouchableOpacity, View, ActivityIndicator, RefreshControl
-} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
 import * as Notifications from 'expo-notifications';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+    ActivityIndicator,
+    FlatList, Keyboard, Platform,
+    RefreshControl,
+    Text, TextInput,
+    TouchableOpacity, View
+} from 'react-native';
 import Animated, { FadeInUp, FadeOutDown } from 'react-native-reanimated';
 
 import { EmptyTask } from '../components/task/EmptyTask';
 import { TaskItem } from '../components/task/TaskItem';
-import { styles } from '../styles/TaskStyles';
 import { useAppContext } from '../context/AppContext';
 import { useTaskLogic } from '../hooks/useTaskLogic';
+import { styles } from '../styles/TaskStyles';
 
 export default function TaskScreen() {
   const { 

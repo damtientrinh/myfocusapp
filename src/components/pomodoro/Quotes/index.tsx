@@ -1,13 +1,15 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Text } from 'react-native';
 import Animated, {
-  interpolate, useAnimatedStyle, useSharedValue,
-  withTiming, runOnJS,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle, useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 
-import { getRandomQuote } from '../../constants/Quotes';
-import { styles } from '../../styles/PomodoroStyles';
 import { useAppContext } from '@/context/AppContext'; // Để lấy fonts
+import { getRandomQuote } from '../../../constants/Quotes';
+import { styles } from './styles';
 
 interface Props {
   mode: 'WORK' | 'SHORT_BREAK' | 'LONG_BREAK'; // Fix type cụ thể

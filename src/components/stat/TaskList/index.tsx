@@ -3,7 +3,7 @@ import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext'; // Lấy theme
-import { styles } from '../../styles/StatsStyles';
+import { styles } from './styles';
 
 interface TaskListProps {
   taskList: any[];
@@ -25,6 +25,7 @@ export const TaskDetailList = ({ taskList, totalPomodoros }: TaskListProps) => {
     );
   }
 
+  
   return (
     <>
       {taskList.map((task, index) => {

@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Dimensions } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 import { useAppContext } from '@/context/AppContext'; 
-import { styles } from '../../styles/StatsStyles';
+import { styles } from './styles';
+
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -36,6 +37,7 @@ export const StatsChart = ({ taskList = [] }: { taskList: any[] }) => {
     labels: last7Days,
     datasets: [{ data: dataPoints }]
   };
+
 
   return (
     <View style={[styles.chartContainer, { backgroundColor: theme.card, borderRadius: 20 }]}>
