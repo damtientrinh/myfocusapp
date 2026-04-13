@@ -1,57 +1,57 @@
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
+import { 
+  useAudioPlayer, 
+  useAudioPlayerStatus, 
+  setAudioModeAsync, 
+  AudioSource
+} from 'expo-audio';
 import { useEffect, useState } from 'react';
 import { STUDY_PLAYLIST } from '../constants/assets';
 
 export const useMusicPlayer = (isActive: boolean) => {
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
 
-  // Cấu hình âm thanh hệ thống 
+  // 1. Khởi tạo Player
+  const player = useAudioPlayer(STUDY_PLAYLIST[currentIndex].file as AudioSource);
+  const status = useAudioPlayerStatus(player);
+
+  // 2. Cấu hình Audio Mode (Sửa tên thuộc tính)
   useEffect(() => {
-    Audio.setAudioModeAsync({
+    (setAudioModeAsync as any)({
       allowsRecordingIOS: false,
-      interruptionModeIOS: InterruptionModeIOS.DoNotMix,
       playsInSilentModeIOS: true,
       shouldDuckAndroid: true,
-      interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
       playThroughEarpieceAndroid: false,
+      interruptionMode: 'do-not-mix', 
     });
   }, []);
 
-  async function loadAndPlay(index: number) {
-    if (sound) {
-      await sound.unloadAsync();
+  // 3. Xử lý Play/Pause
+  useEffect(() => {
+    if (isActive && !isMuted) {
+      player.play();
+    } else {
+      player.pause();
     }
+  }, [isActive, isMuted, player]);
 
-    const { sound: newSound } = await Audio.Sound.createAsync(
-      STUDY_PLAYLIST[index].file,
-      { shouldPlay: isActive && !isMuted, volume: 0.5 },
-      onPlaybackStatusUpdate // Theo dõi trạng thái để tự đổi bài
-    );
-    setSound(newSound);
-  }
-
-  // Tự động chuyển bài khi hết nhạc
-  const onPlaybackStatusUpdate = (status: any) => {
+  // 4. Tự động chuyển bài
+  useEffect(() => {
     if (status.didJustFinish) {
       nextTrack();
     }
-  };
+  }, [status.didJustFinish]);
 
   const nextTrack = () => {
     const nextIndex = (currentIndex + 1) % STUDY_PLAYLIST.length;
     setCurrentIndex(nextIndex);
-    loadAndPlay(nextIndex);
+    player.replace(STUDY_PLAYLIST[nextIndex].file as AudioSource);
   };
 
+  // 5. Điều chỉnh âm lượng
   useEffect(() => {
-    if (!sound) {
-      loadAndPlay(currentIndex);
-    } else {
-      isActive && !isMuted ? sound.playAsync() : sound.pauseAsync();
-    }
-  }, [isActive, isMuted]);
+    player.volume = isMuted ? 0 : 0.5; 
+  }, [isMuted, player]);
 
   return { 
     isMuted, 

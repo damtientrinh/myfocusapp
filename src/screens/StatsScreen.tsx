@@ -4,8 +4,8 @@ import React, { useCallback, useMemo } from 'react';
 import { ActivityIndicator, Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { StatCards } from '@/components/stat/StatCards';
-import { StatsChart } from '@/components/stat/StatsChart';
-import { TaskDetailList } from '@/components/stat/TaskDetailList';
+import { StatsChart } from '@/components/stat/StatChart';
+import { TaskDetailList } from '@/components/stat/TaskList';
 import { styles } from '@/styles/StatsStyles';
 
 import { useAppContext } from '@/context/AppContext';

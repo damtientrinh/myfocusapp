@@ -5,8 +5,8 @@ export const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
     borderRadius: 25, 
     borderWidth: 1,
     // Hiệu ứng đổ bóng mờ ảo
@@ -17,23 +17,23 @@ export const styles = StyleSheet.create({
     elevation: 5,
   },
   iconBtn: {
-    width: 36,
-    height: 36,
+    width: 20,
+    height: 32,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 18,
   },
   titleWrapper: {
-    width: 140, // Tăng thêm một chút cho thoải mái
+    width: 120, 
     marginHorizontal: 8,
     overflow: 'hidden',
   },
   titleText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '600',
     textAlign: 'center',
     letterSpacing: 0.5,
-    textTransform: 'capitalize', // Tự động viết hoa chữ cái đầu cho đẹp
+    textTransform: 'capitalize', 
   },
   // Thêm một chấm nhỏ báo hiệu đang phát
   activeDot: {

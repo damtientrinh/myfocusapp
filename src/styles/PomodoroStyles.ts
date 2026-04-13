@@ -52,12 +52,11 @@ export const styles = StyleSheet.create({
   button: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingVertical: 12,
     borderRadius: 30, 
-    minWidth: 150,
+    minWidth: 140,
     alignItems: 'center',
     justifyContent: 'center',
-    // Đổ bóng cho nút (Shadow)
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -65,7 +64,7 @@ export const styles = StyleSheet.create({
     elevation: 5, 
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: FontWeight.medium,
     letterSpacing: 1, 
     textTransform: 'uppercase', 
@@ -105,5 +104,21 @@ export const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  
+  statsContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)', 
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    // marginTop: 10,
+    alignSelf: 'center', // Căn giữa container
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+
+  statsText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
 });

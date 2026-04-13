@@ -170,7 +170,7 @@ export default function FocusScreen() {
         )}
       </View>
 
-      <View style={{ marginVertical: 15, alignItems: 'center' }}>
+      <View style={{ marginVertical: 10, alignItems: 'center' }}>
         <MusicControl 
           isMuted={isMuted}
           setIsMuted={setIsMuted}

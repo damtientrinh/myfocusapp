@@ -7,13 +7,13 @@ import { AppProvider, useAppContext } from './src/context/AppContext';
 import { TabNavigator } from './src/navigation/TabNavigator';
 
 // --- CẤU HÌNH THÔNG BÁO ---
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  } as Notifications.NotificationBehavior),
-});
+// Notifications.setNotificationHandler({
+//   handleNotification: async () => ({
+//     shouldShowAlert: true,
+//     shouldPlaySound: true,
+//     shouldSetBadge: true,
+//   } as Notifications.NotificationBehavior),
+// });
 
 const RootApp = () => {
   const { isLoaded, theme } = useAppContext();
