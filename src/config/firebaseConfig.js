@@ -1,28 +1,27 @@
-import { initializeApp, getApp, getApps } from "firebase/app";
-import { 
-  getFirestore, 
-  initializeFirestore, 
-  memoryLocalCache, 
-  persistentLocalCache 
-} from "firebase/firestore";
-import { initializeAuth, getReactNativePersistence, getAuth } from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { getAuth, getReactNativePersistence, initializeAuth } from 'firebase/auth';
+import {
+  getFirestore,
+  initializeFirestore,
+  persistentLocalCache
+} from "firebase/firestore";
 
+// Sử dụng biến môi trường để bảo mật API Key
 const firebaseConfig = {
-  apiKey: "AIzaSyB4s6PiT4jTAQRxNblA3zFZPufuVEbyzzA",
-  authDomain: "focusapp-7f2a0.firebaseapp.com",
-  projectId: "focusapp-7f2a0",
-  storageBucket: "focusapp-7f2a0.firebasestorage.app",
-  messagingSenderId: "858637487518",
-  appId: "1:858637487518:web:bb9b99890bb5697ead9a8f",
-  measurementId: "G-76XG9J63T8"
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 // 1. Khởi tạo Firebase App an toàn
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// 2. Khởi tạo Auth với Persistence (Lưu trạng thái đăng nhập)
-// Trong React Native, ta nên check kỹ để tránh lỗi "Auth has already been initialized"
+// 2. Khởi tạo Auth an toàn
 let firebaseAuth;
 try {
   firebaseAuth = getAuth(app);
@@ -32,19 +31,14 @@ try {
   });
 }
 
-// 3. Khởi tạo Firestore với cấu hình phù hợp cho Mobile
-// Dùng cấu hình này để tránh lỗi "IndexedDB" thường gặp trên môi trường Web-polyfilled của React Native
+// 3. Khởi tạo Firestore an toàn cho Mobile
 let firestoreDb;
-if (getApps().length > 0) {
-    try {
-        firestoreDb = initializeFirestore(app, {
-            localCache: persistentLocalCache({}) // Tự động quản lý offline cache cho Mobile
-        });
-    } catch (e) {
-        firestoreDb = getFirestore(app);
-    }
-} else {
-    firestoreDb = getFirestore(app);
+try {
+  firestoreDb = initializeFirestore(app, {
+    localCache: persistentLocalCache({}) 
+  });
+} catch (e) {
+  firestoreDb = getFirestore(app);
 }
 
 export const db = firestoreDb;
