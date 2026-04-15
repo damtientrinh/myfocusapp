@@ -131,7 +131,7 @@ export const usePomodoro = () => {
     // Đợi hiệu ứng UI xong rồi mới update DB (Tránh lag)
     setTimeout(async () => {
       try {
-        await toggleTask(targetId);
+        await toggleTask(targetId, true);
 
         if (onSuccess) onSuccess();
       } catch (e) {

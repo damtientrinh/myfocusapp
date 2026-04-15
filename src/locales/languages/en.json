@@ -42,7 +42,10 @@
     "toast_uncheck": "↩️ Task unchecked",
     "toast_deleted": "🗑️ Task deleted",
     "delete_focus_title": "Active Task! 🎯",
-    "delete_focus_msg": "You are focusing on this task. Deleting it will stop the current session. Are you sure?"
+    "delete_focus_msg": "You are focusing on this task. Deleting it will stop the current session. Are you sure?",
+    "login_required": "Please login to use this feature!",
+    "selected_for_focus": "🚀 Task selected for focus!",
+    "delete_all_confirm": "Are you sure you want to delete all tasks from the cloud?"
   },
 
   "stats": {
@@ -69,7 +72,9 @@
     "header": "Settings",
     "sections": {
       "pomodoro": "POMODORO",
-      "appearance": "APPEARANCE"
+      "appearance": "APPEARANCE",
+      "system": "SYSTEM",
+      "profile": "ACCOUNT"
     },
     "work_time": "Work Duration",
     "minutes": "mins",
@@ -78,17 +83,38 @@
     "light_mode": "Light Mode",
     "language": "Language",
     "reset_settings": "Reset Settings",
-    "reset_confirm": "Do you want to reset all settings to default? (Your tasks will be kept)",
+    "reset_confirm": "Are you sure you want to reset all settings to default?",
     "reset_success": "Reset successful!",
     "reset_success_msg": "Your settings have been restored to default.",
     "reset_button": "Reset",
-    "version": "Version 1.0.0 • made with ❤️ by DTT",
-    "logout_title": "Logout"
+    "version": "Version 1.0.0 • Made with ❤️ by DTT",
+    "logout_title": "Logout",
+    "logout_confirm": "Are you sure you want to logout?",
+    "edit_profile": "Edit Profile",
+    "view_profile": "View Profile Details"
+  },
+
+  "profile": {
+    "header": "Profile",
+    "plan_pro": "Pro Member",
+    "edit": "Edit",
+    "upgrade": "Upgrade",
+    "achievements": "Achievements",
+    "monthly_stats": "Monthly Stats",
+    "view_all": "View All",
+    "stats": {
+      "minutes": "Minutes",
+      "sessions": "Sessions",
+      "streak": "Day Streak"
+    }
   },
 
   "common": {
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "delete": "Delete"
+    "delete": "Delete",
+    "notice": "Notice",
+    "error": "Error",
+    "loading": "Loading..."
   }
 }

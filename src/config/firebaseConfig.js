@@ -1,7 +1,11 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-// Xóa dòng import { getAuth } thừa ở đây
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { initializeApp, getApp, getApps } from "firebase/app";
+import { 
+  getFirestore, 
+  initializeFirestore, 
+  memoryLocalCache, 
+  persistentLocalCache 
+} from "firebase/firestore";
+import { initializeAuth, getReactNativePersistence, getAuth } from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
@@ -14,12 +18,35 @@ const firebaseConfig = {
   measurementId: "G-76XG9J63T8"
 };
 
-const app = initializeApp(firebaseConfig);
+// 1. Khởi tạo Firebase App an toàn
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-export const db = getFirestore(app);
+// 2. Khởi tạo Auth với Persistence (Lưu trạng thái đăng nhập)
+// Trong React Native, ta nên check kỹ để tránh lỗi "Auth has already been initialized"
+let firebaseAuth;
+try {
+  firebaseAuth = getAuth(app);
+} catch (e) {
+  firebaseAuth = initializeAuth(app, {
+    persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+  });
+}
 
-export const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
-});
+// 3. Khởi tạo Firestore với cấu hình phù hợp cho Mobile
+// Dùng cấu hình này để tránh lỗi "IndexedDB" thường gặp trên môi trường Web-polyfilled của React Native
+let firestoreDb;
+if (getApps().length > 0) {
+    try {
+        firestoreDb = initializeFirestore(app, {
+            localCache: persistentLocalCache({}) // Tự động quản lý offline cache cho Mobile
+        });
+    } catch (e) {
+        firestoreDb = getFirestore(app);
+    }
+} else {
+    firestoreDb = getFirestore(app);
+}
 
+export const db = firestoreDb;
+export const auth = firebaseAuth;
 export default app;

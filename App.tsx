@@ -1,54 +1,88 @@
 import React, { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet, Alert, Platform } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Alert, LogBox } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Notifications from 'expo-notifications';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+// Context & Navigation
 import { AppProvider, useAppContext } from './src/context/AppContext';
 import { TabNavigator } from './src/navigation/TabNavigator';
 
-// --- CẤU HÌNH THÔNG BÁO ---
-// Notifications.setNotificationHandler({
-//   handleNotification: async () => ({
-//     shouldShowAlert: true,
-//     shouldPlaySound: true,
-//     shouldSetBadge: true,
-//   } as Notifications.NotificationBehavior),
-// });
+// Screens
+import Login from "./src/screens/Login";
+import Register from "./src/screens/Register";
+import SettingScreen from '@/screens/SettingScreen';
+import ProfileScreen from "./src/screens/Profile";
+import EditProfileScreen from './src/screens/EditProfileScreen';
+
+const Stack = createNativeStackNavigator();
+LogBox.ignoreLogs(['expo-notifications', 'i18next is made possible', 'expo-av']);
+
+// 1. Nhóm màn hình chưa đăng nhập
+const AuthStack = ({ setUser }: any) => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Login">
+      {(props) => <Login {...props} setUser={setUser} />}
+    </Stack.Screen>
+    <Stack.Screen name="Register" component={Register} />
+  </Stack.Navigator>
+);
+
+// 2. Nhóm màn hình sau khi đăng nhập (Bao gồm Tab và các trang chi tiết)
+const MainStack = () => (
+  <Stack.Navigator>
+    {/* Màn hình chính chứa 5 Tab */}
+    <Stack.Screen 
+      name="MainTabs" 
+      component={TabNavigator} 
+      options={{ headerShown: false }} 
+    />
+
+    <Stack.Screen 
+      name="Settings" 
+      component={SettingScreen} // Đảm bảo đã import SettingsScreen ở trên
+      options={{ title: 'Cài đặt' }} 
+    />
+    
+    {/* Màn hình Profile - Nằm ngoài TabNavigator để ẩn thanh Tab Bar */}
+    <Stack.Screen 
+      name="Profile" 
+      component={ProfileScreen} 
+      options={{ 
+        headerTitle: 'Hồ sơ cá nhân',
+        headerBackTitle: 'Quay lại',
+        headerTintColor: '#e74c3c', // Màu đỏ thương hiệu của MyFocus
+        headerStyle: { backgroundColor: '#fff' },
+      }} 
+    />
+
+    <Stack.Screen 
+      name="EditProfile" 
+      component={EditProfileScreen} 
+      options={{ title: 'Chỉnh sửa hồ sơ' }} 
+    />
+  </Stack.Navigator>
+);
 
 const RootApp = () => {
-  const { isLoaded, theme } = useAppContext();
+  const { isLoaded, theme, user, setUser } = useAppContext();
 
-  // Xin quyền thông báo khi App vừa khởi động
   useEffect(() => {
     const requestPermissions = async () => {
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
-      
       if (existingStatus !== 'granted') {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
       }
-
       if (finalStatus !== 'granted') {
-        Alert.alert('Thông báo', 'Trình hãy bật thông báo để không bỏ lỡ khi hết giờ tập trung nhé!');
-        return;
-      }
-
-      // Cấu hình riêng cho Android (Kênh thông báo)
-      if (Platform.OS === 'android') {
-        Notifications.setNotificationChannelAsync('default', {
-          name: 'default',
-          importance: Notifications.AndroidImportance.MAX,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#FF231F7C',
-        });
+        Alert.alert('Thông báo', 'Bật thông báo để không bỏ lỡ khi hết giờ nhé!');
       }
     };
-
     requestPermissions();
   }, []);
 
-  // 1. Chờ load dữ liệu từ máy và Firebase
   if (!isLoaded) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme?.background || '#f8f9fa' }]}>
@@ -57,26 +91,27 @@ const RootApp = () => {
     );
   }
 
-  // 2. Khi đã load xong, hiển thị hệ thống Tab
   return (
     <NavigationContainer>
-      <TabNavigator />
+      {user ? (
+        <MainStack /> 
+      ) : (
+        <AuthStack setUser={setUser}/>
+      )}
     </NavigationContainer>
   );
 };
 
 export default function App() {
   return (
-    <AppProvider>
-      <RootApp />
-    </AppProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppProvider>
+        <RootApp />
+      </AppProvider>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });

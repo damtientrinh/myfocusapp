@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, TouchableOpacity, View } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { useLocalSearchParams } from 'expo-router';
 
 // Firebase
 import { db } from '@/config/firebaseConfig';
@@ -29,7 +30,10 @@ import { useMusicPlayer } from '../hooks/useMusicPlayer';
 
 export default function FocusScreen() {
   const { t } = useTranslation();
-  const { selectedTaskId, isDarkMode, user, incrementTaskPomodoro } = useAppContext();
+  const { taskId } = useLocalSearchParams();
+  const { 
+    selectedTaskId, setSelectedTaskId, 
+    isDarkMode, user, incrementTaskPomodoro } = useAppContext();
   const { 
     time, isActive, mode, pomodoroCount, setIsActive, changeMode, 
     formatTime, totalSeconds, handleFinishTask,
@@ -38,8 +42,19 @@ export default function FocusScreen() {
   const { taskList } = useTaskLogic();
   const [showConfetti, setShowConfetti] = useState(false);
 
+  // Đồng bộ Task từ Params ---
+  useEffect(() => {
+    if (taskId && taskId !== selectedTaskId) {
+      setSelectedTaskId(taskId as string);
+      
+      // Nếu muốn: Tự động nhấn Start khi vừa bấm "Tập trung" từ màn hình kia
+      // setIsActive(true); 
+    }
+  }, [taskId]);
+
   const activeTask = useMemo(() => 
-    taskList.find(t => t.id === selectedTaskId), [taskList, selectedTaskId]);
+    taskList.find(t => t.id === (taskId || selectedTaskId)), 
+  [taskList, selectedTaskId]);
 
   const { isMuted, setIsMuted, nextTrack, currentTrackTitle } = useMusicPlayer(isActive);
 
@@ -71,16 +86,23 @@ export default function FocusScreen() {
   const savePomodoroSession = async () => {
     if (mode !== 'WORK' || !user) return;
     try {
+      const currentTaskText = activeTask?.text || "Tập trung tự do";
+      const currentTaskId = activeTask?.id || selectedTaskId;
+
       await addDoc(collection(db, "sessions"), {
-        userId: user.id,
+        userId: user.uid,
         userName: user.name || "User",
         taskText: activeTask?.text || "Tập trung tự do",
         duration: Math.floor(totalSeconds / 60), 
         createdAt: serverTimestamp(),
       });
-      const userRef = doc(db, "users", user.id);
-      await updateDoc(userRef, { totalMinutes: increment(Math.floor(totalSeconds / 60)) });
-      if (selectedTaskId) incrementTaskPomodoro(selectedTaskId);
+
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, { 
+        totalMinutes: increment(Math.floor(totalSeconds / 60)) 
+      });
+      
+      if (currentTaskId) incrementTaskPomodoro(currentTaskId);
     } catch (error) { console.error("Lỗi lưu dữ liệu:", error); }
   };
   
@@ -94,6 +116,7 @@ export default function FocusScreen() {
   }, [time, isActive]);
 
   const progress = time / totalSeconds; // 1 -> 0
+
 
   return (
     <Animated.View style={[styles.container, animatedContainer]}>
@@ -119,12 +142,20 @@ export default function FocusScreen() {
         />
         <View style={[
           styles.innerCircle, 
-          { backgroundColor: isDarkMode ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.05)' }
+          { 
+            backgroundColor: isDarkMode ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.1)',
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.2)'
+          }
         ]}>
           <Text style={styles.timeText}>{formatTime(time)}</Text>
+          <Text style={{ color: '#fff', opacity: 0.6, fontSize: 12, fontWeight: '600' }}>
+            {mode === 'WORK' ? 'FOCUS' : 'REST'}
+          </Text>
         </View>
       </View>
 
+      
       <View style={styles.buttonRow}>
         <TouchableOpacity 
           style={styles.button} 
@@ -133,6 +164,7 @@ export default function FocusScreen() {
             setIsActive(!isActive);
           }}
         >
+          {/* <Ionicons name={isActive ? "pause" : "play"} size={24} color={modeColors[0]} /> */}
           <Text style={[styles.buttonText, { color: modeColors[0] }]}>
             {isActive ? t('pomodoro.pause') : t('pomodoro.start')}
           </Text>

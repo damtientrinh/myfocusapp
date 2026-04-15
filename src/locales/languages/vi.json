@@ -5,7 +5,6 @@
     "settings": "Cài đặt"
   },
 
-
   "pomodoro": {
     "start": "BẮT ĐẦU",
     "pause": "TẠM DỪNG",
@@ -28,7 +27,6 @@
     "finish_body": "Bạn đã hoàn thành công việc này một cách xuất sắc."
   },
 
-
   "tasks": {
     "header": "Công việc hàng ngày",
     "placeholder": "Ghi chú công việc...",
@@ -44,9 +42,11 @@
     "toast_uncheck": "↩️ Đã bỏ tích",
     "toast_deleted": "🗑️ Đã xóa công việc",
     "delete_focus_title": "Task đang thực hiện! 🎯",
-    "delete_focus_msg": "Bạn đang tập trung cho công việc này. Xóa nó sẽ dừng phiên làm việc hiện tại. Bạn chắc chắn chứ?"
+    "delete_focus_msg": "Bạn đang tập trung cho công việc này. Xóa nó sẽ dừng phiên làm việc hiện tại. Bạn chắc chắn chứ?",
+    "login_required": "Bạn cần đăng nhập để sử dụng tính năng này!",
+    "selected_for_focus": "🚀 Đã chọn task tập trung!",
+    "delete_all_confirm": "Bạn có chắc chắn muốn xóa toàn bộ danh sách công việc trên đám mây?"
   },
-
 
   "stats": {
     "header": "Thống kê 📊",
@@ -56,22 +56,25 @@
     "alert_title": "Xác nhận xóa 🗑️",
     "alert_msg": "Bạn có chắc muốn xóa toàn bộ lịch sử công việc?"
   },
+
   "stat_cards": {
     "total_pomodoros": "Tổng Cà chua",
     "completed": "Đã xong",
     "pending": "Đang thực hiện: ",
     "tasks_unit": " công việc"
   },
+
   "task_details": {
     "task_empty": "Hôm nay bạn chưa làm việc gì sao? Hãy bắt đầu ngay nhé!"
   },
-
 
   "settings": {
     "header": "Cài đặt",
     "sections": {
       "pomodoro": "POMODORO",
-      "appearance": "GIAO DIỆN"
+      "appearance": "GIAO DIỆN",
+      "system": "HỆ THỐNG",
+      "profile": "TÀI KHOẢN"
     },
     "work_time": "Thời gian làm việc",
     "minutes": "phút",
@@ -80,18 +83,38 @@
     "light_mode": "Chế độ sáng",
     "language": "Ngôn ngữ",
     "reset_settings": "Đặt lại cài đặt",
-    "reset_confirm": "Bạn có muốn đưa mọi cài đặt về mặc định không? (Danh sách công việc vẫn được giữ nguyên)",
+    "reset_confirm": "Bạn có chắc chắn muốn đưa tất cả cài đặt về mặc định?",
     "reset_success": "Đã đặt lại!",
     "reset_success_msg": "Cài đặt của bạn đã trở về trạng thái ban đầu.",
     "reset_button": "Cài lại",
-    "version": "Phiên bản 1.0.0 • được làm ❤️ bởi DTT",
-    "logout_title": "Đăng xuất"
+    "version": "Phiên bản 1.0.0 • Made with ❤️ by DTT",
+    "logout_title": "Đăng xuất",
+    "logout_confirm": "Bạn có chắc chắn muốn đăng xuất không?",
+    "edit_profile": "Chỉnh sửa hồ sơ",
+    "view_profile": "Xem chi tiết hồ sơ"
   },
 
+  "profile": {
+    "header": "Hồ sơ",
+    "plan_pro": "Thành viên Pro",
+    "edit": "Chỉnh sửa",
+    "upgrade": "Nâng cấp",
+    "achievements": "Thành tích",
+    "monthly_stats": "Thống kê tháng",
+    "view_all": "Xem tất cả",
+    "stats": {
+      "minutes": "Phút",
+      "sessions": "Phiên",
+      "streak": "Ngày streak"
+    }
+  },
 
   "common": {
     "cancel": "Huỷ",
     "confirm": "Xác nhận",
-    "delete": "Xóa"
+    "delete": "Xóa",
+    "notice": "Thông báo",
+    "error": "Lỗi",
+    "loading": "Đang tải..."
   }
 }

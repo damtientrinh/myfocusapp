@@ -11,8 +11,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { useAppContext } from '../../../context/AppContext';
-import { RelativePathString, useRouter } from 'expo-router';
 import { styles } from './styles';
 
 
@@ -24,17 +25,18 @@ export const TaskItem = ({ task, onToggle, onDelete }: any) => {
   const { t } = useTranslation();
 
   const router = useRouter();
+  const navigation = useNavigation<any>();
+
   const translateX = useSharedValue(0);
   const context = useSharedValue(0);
 
   const isFocusing = selectedTaskId === task.id;
 
   // 1. Xử lý ngày tháng
-  const reminderDate = task.reminderDate ? new Date(task.reminderDate) : new Date();
-  const formattedTime = reminderDate.toLocaleTimeString(
-    language === 'vi' ? 'vi-VN' : 'en-US', 
-    { hour: '2-digit', minute: '2-digit' }
-  );
+  const reminderDate = task.reminderDate ? new Date(task.reminderDate) : null;
+  const formattedTime = reminderDate && !isNaN(reminderDate.getTime()) 
+    ? reminderDate.toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' })
+    : '--:--';
 
   // 2. Rung phản hồi (Haptics)
   useAnimatedReaction(
@@ -90,18 +92,26 @@ export const TaskItem = ({ task, onToggle, onDelete }: any) => {
 
   const handleFocus = () => {
     if (task.completed) return;
+    
+    // Rung phản hồi
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    // Bước 1: Cập nhật State cho Context
     setSelectedTaskId(task.id);
-    router.push({
-      pathname: '/' as RelativePathString,
-      params: { taskId: task.id }
-    }); 
+    
+    // Bước 2: Điều hướng bằng Navigation chính của App
+    setTimeout(() => {
+      try {
+        navigation.navigate('Focus'); 
+      } catch (e) {
+        console.error("Lỗi điều hướng:", e);
+      }
+    }, 50); 
   };
 
 
   return (
     <View style={[styles.itemWrapper, { marginBottom: spacing.sm }]}> 
-      {/* Nền xóa (Dùng màu Primary của theme làm background quẹt) */}
       <View style={[styles.deleteBackground, { backgroundColor: theme.primary }]}>
         <Animated.View style={rIconStyle}>
           <Ionicons name="trash-outline" size={26} color="white" />

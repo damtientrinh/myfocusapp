@@ -6,11 +6,15 @@ import Animated, {
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue, withRepeat,
-  withTiming
+  withTiming, SharedValue
 } from 'react-native-reanimated';
-import Svg, { Circle, ClipPath, Defs, G, LinearGradient, Path, Stop } from 'react-native-svg';
+import Svg, { 
+  Circle, ClipPath, Defs, G, LinearGradient, Path, 
+  Stop, 
+} from 'react-native-svg';
 import { Shadows } from '../../../constants/theme';
 import { styles } from './styles';
+import { BubbleItem } from '../BubbleItem';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -20,6 +24,13 @@ interface Props {
   colors: [string, string];
   isDarkMode: boolean;
 }
+
+const BUBBLES = Array.from({ length: 15 }).map((_, i) => ({
+  id: i,
+  xPos: 15 + Math.random() * 70,
+  delay: Math.random(),
+  size: 0.5 + Math.random() * 1.2
+}));
 
 export const GradientLoader = ({ isActive, progress, colors, isDarkMode }: Props) => {
   const waveOffset1 = useSharedValue(0);
@@ -43,8 +54,9 @@ export const GradientLoader = ({ isActive, progress, colors, isDarkMode }: Props
   }, []);
 
   const smoothWaveH = useDerivedValue(() => {
-    return withTiming(isActive ? 8 : 1, { duration: 1000 });
-  }, [isActive]);
+    const baseH = isActive ? 8 : 2;
+    return withTiming(baseH * progress, { duration: 1000 });
+  }, [isActive, progress]);
 
   const createWaveProps = (offset: any, isReverse: boolean) => useAnimatedProps(() => {
     const currentLevel = smoothLevel.value;
@@ -74,6 +86,8 @@ export const GradientLoader = ({ isActive, progress, colors, isDarkMode }: Props
   // Tạo animated style cho box
   const pulse = useSharedValue(1);
   
+  const bubbleY = useSharedValue(0);
+
   useEffect(() => {
     if (isActive) {
       pulse.value = withRepeat(
@@ -90,6 +104,20 @@ export const GradientLoader = ({ isActive, progress, colors, isDarkMode }: Props
     transform: [{ scale: scale.value * pulse.value }],
     opacity: withTiming(isActive ? 1 : 0.8),
   }));
+
+  useEffect(() => {
+    if (isActive) {
+      bubbleY.value = withRepeat(
+        withTiming(1, { duration: 3000, easing: Easing.linear }),
+        -1, 
+        false // Phải để false để nó quay lại 0 rồi bay lên tiếp, không bay giật lùi
+      );
+    } else {
+      bubbleY.value = 0; // Reset khi không active
+    }
+  }, [isActive]);
+
+
 
   return (
     <View style={styles.container}>
@@ -114,7 +142,8 @@ export const GradientLoader = ({ isActive, progress, colors, isDarkMode }: Props
           {/* 1. Viền hào quang Neon (Glow) */}
           <Circle 
             cx="50" cy="50" r="48" 
-            stroke={mainColor} strokeWidth="1.5" strokeOpacity={0.3} 
+            stroke={mainColor} 
+            strokeWidth="2" strokeOpacity={0.15} 
             fill="none" 
           />
 
@@ -126,20 +155,42 @@ export const GradientLoader = ({ isActive, progress, colors, isDarkMode }: Props
             <AnimatedPath 
               animatedProps={animatedProps2} 
               fill={mainColor} 
-              fillOpacity={0.7} 
+              fillOpacity={0.4} 
             />
+
+            {isActive && BUBBLES.map((bubble) => (
+              <BubbleItem 
+                key={bubble.id}
+                bubbleY={bubbleY} 
+                xPos={bubble.xPos} 
+                delay={bubble.delay} 
+                baseSize={bubble.size}
+                progress={progress} // waterProgress
+              />
+            ))}
             
             {/* 4. Lớp sóng gần: Đặc hoàn toàn (Opacity 1) */}
             <AnimatedPath 
               animatedProps={animatedProps1} 
               fill="url(#waterGrad)" 
             />
+
+            <AnimatedPath 
+              animatedProps={animatedProps1} 
+              fill="none"
+              stroke="white"
+              strokeWidth="0.5"
+              strokeOpacity={0.4}
+            />
           </G>
+
+          
 
           {/* 5. Highlight viền kính (Giúp quả cầu rõ nét) */}
           <Circle 
             cx="50" cy="50" r="46" 
-            stroke="white" strokeWidth="1.25" strokeOpacity={0.8} 
+            stroke={isDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.1)"} 
+            strokeWidth="2" strokeOpacity={0.8} 
             fill="none" 
           />
         </Svg>

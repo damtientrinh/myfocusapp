@@ -1,7 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useMemo } from 'react';
-import { ActivityIndicator, Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  Text, TouchableOpacity, View
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { StatCards } from '@/components/stat/StatCards';
 import { StatsChart } from '@/components/stat/StatChart';
@@ -12,60 +18,46 @@ import { useAppContext } from '@/context/AppContext';
 import { useTranslation } from 'react-i18next';
 
 export default function StatsScreen() {
-  const { taskList, clearAllTasks, theme, refreshTasks, isLoaded, loading } = useAppContext();
+  const insets = useSafeAreaInsets();
+  // Chỉ lấy những gì AppContext thực sự cung cấp
+  const { taskList, clearAllTasks, theme, isLoaded, loading, refreshTasks } = useAppContext();
   const { t } = useTranslation();
 
-  // 1. Tối ưu tính toán Stats
+  // 1. Tối ưu tính toán Stats (Dùng useMemo để không tính lại khi cuộn trang)
   const stats = useMemo(() => {
     const safeList = taskList || [];
-    const totalPomodoros = safeList.reduce((acc, t) => acc + (t.pomodoroCount || 0), 0);
+    const totalPomodoros = safeList.reduce((acc, t) => acc + (Number(t.pomodoroCount) || 0), 0);
     const completedTasks = safeList.filter(t => t.completed).length;
-    const pendingTasks = safeList.length - completedTasks;
+    const pendingTasks = Math.max(0, safeList.length - completedTasks);
 
     return { totalPomodoros, completedTasks, pendingTasks };
   }, [taskList]);
 
-  // 2. Lọc 5 hoạt động gần đây nhất (Sắp xếp theo thời gian tạo)
+  // 2. Lọc 5 hoạt động gần đây (Sắp xếp theo thời gian ISO String từ Context)
   const recentActivities = useMemo(() => {
-    return [...(taskList || [])]
-      .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
+    if (!taskList) return [];
+    return [...taskList]
+      .sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0).getTime();
+        const dateB = new Date(b.createdAt || 0).getTime();
+        return dateB - dateA; // Mới nhất lên đầu
+      })
       .slice(0, 5);
   }, [taskList]);
 
-  const handleReset = () => {
-    Alert.alert(
-      t('stats.alert_title'),
-      t('stats.alert_msg'),
-      [
-        { text: t('common.cancel'), style: "cancel" },
-        { 
-          text: t('common.confirm'), 
-          style: "destructive", 
-          onPress: async () => {
-            try {
-              await clearAllTasks();
-            } catch (e) {
-              console.error("Lỗi xóa dữ liệu:", e);
-            }
-          } 
-        }
-      ]
-    );
-  };
-
-  // 3. Tự động làm mới khi quay lại màn hình này
+  // 3. Tự động refresh nhẹ khi focus vào màn hình
   useFocusEffect(
     useCallback(() => {
       if (refreshTasks) refreshTasks();
     }, [])
   );
 
-  // Hiển thị loading xoay tròn nếu lần đầu vào app chưa có dữ liệu
-  if (!isLoaded && !taskList) {
+  // Hiển thị loading khi đang tải dữ liệu từ Firebase lần đầu
+  if (!isLoaded || (loading && taskList.length === 0)) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center' }]}>
-        <ActivityIndicator size="large" color={theme.primary || "#FF5252"} />
-        <Text style={{ color: theme.subText, textAlign: 'center', marginTop: 10 }}>{t('common.loading')}</Text>
+      <View style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#FF5252" />
+        <Text style={{ color: theme.subText, marginTop: 10 }}>{t('common.loading')}</Text>
       </View>
     );
   }
@@ -73,91 +65,118 @@ export default function StatsScreen() {
   return (
     <ScrollView 
       style={[styles.container, { backgroundColor: theme.background }]} 
-      contentContainerStyle={[styles.content, { paddingBottom: 40 }]}
+      contentContainerStyle={{ 
+        paddingTop: insets.top + 10, 
+        paddingBottom: insets.bottom + 40,
+        paddingHorizontal: 16
+      }}
       showsVerticalScrollIndicator={false}
-      // Thêm RefreshControl để người dùng tự kéo làm mới thống kê
       refreshControl={
         <RefreshControl 
           refreshing={loading} 
           onRefresh={refreshTasks} 
-          tintColor={theme.primary} 
+          tintColor="#FF5252" 
         />
       }
     >
       {/* Header */}
-      <View style={styles.headerRow}>
-        <Text style={[styles.header, { color: theme.text }]}>
-          {t('stats.header')}
-        </Text>
+      <View style={[styles.headerRow, { marginBottom: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+        <View>
+          <Text style={[styles.header, { color: theme.text, fontSize: 24, fontWeight: '800' }]}>
+            {t('stats.header')}
+          </Text>
+          <Text style={{ color: theme.subText, fontSize: 13 }}>
+            {t('stats.subtitle', 'Theo dõi tiến độ học tập')}
+          </Text>
+        </View>
 
-        <TouchableOpacity onPress={handleReset} style={styles.resetButton}>
-          <Ionicons name="trash-bin-outline" size={18} color="#FF5252" />
-          <Text style={styles.resetText}>{t('stats.reset_button')}</Text>
+        <TouchableOpacity 
+          onPress={clearAllTasks} 
+          style={{ backgroundColor: '#FF525215', padding: 10, borderRadius: 12 }}
+        >
+          <Ionicons name="trash-outline" size={22} color="#FF5252" />
         </TouchableOpacity>
       </View>
 
       {/* Thẻ thống kê tổng quát */}
-      <StatCards {...stats} />
+      <StatCards 
+        totalPomodoros={stats.totalPomodoros} 
+        completedTasks={stats.completedTasks} 
+        pendingTasks={stats.pendingTasks} 
+      />
 
       {/* Biểu đồ năng suất */}
-      <Text style={[styles.subHeader, { color: theme.text, marginTop: 24 }]}>
-        {t('stats.productivity_chart')}
-      </Text>
-      <View style={{ marginTop: 12 }}>
-        <StatsChart taskList={taskList} />
+      <View style={{ marginTop: 24 }}>
+        <Text style={[styles.subHeader, { color: theme.text, fontWeight: '700', marginBottom: 12 }]}>
+          {t('stats.productivity_chart')}
+        </Text>
+        <View style={{ backgroundColor: theme.card, borderRadius: 16, padding: 10 }}>
+          <StatsChart taskList={taskList} />
+        </View>
       </View>
 
-      {/* Danh sách chi tiết */}
-      <Text style={[styles.subHeader, { color: theme.text, marginTop: 24 }]}>
-        {t('stats.task_details')}
-      </Text>
-      <TaskDetailList taskList={taskList} totalPomodoros={stats.totalPomodoros} />
+      {/* Danh sách nhiệm vụ chi tiết */}
+      <View style={{ marginTop: 24 }}>
+        <Text style={[styles.subHeader, { color: theme.text, fontWeight: '700', marginBottom: 12 }]}>
+          {t('stats.task_details')}
+        </Text>
+        <TaskDetailList taskList={taskList} totalPomodoros={stats.totalPomodoros} />
+      </View>
 
       {/* Hoạt động gần đây */}
-      <Text style={[styles.subHeader, { color: theme.text, marginTop: 30 }]}>
-        {t('stats.recent_activity', 'Hoạt động gần đây')}
-      </Text>
-      
-      <View style={[styles.activityList, { 
-        backgroundColor: theme.card, 
-        marginTop: 12, 
-        borderRadius: 16,
-        borderWidth: 0.5,
-        borderColor: theme.border
-      }]}>
-         {recentActivities.length > 0 ? (
-           recentActivities.map((task, index) => (
-            <View 
-              key={task.id} 
-              style={[
-                styles.activityItem, 
-                { borderBottomColor: theme.border },
-                index === recentActivities.length - 1 && { borderBottomWidth: 0 } 
-              ]}
-            >
-               <Ionicons 
-                 name={task.completed ? "checkmark-circle" : "time-outline"} 
-                 size={22} 
-                 color={task.completed ? "#4CAF50" : "#FFA000"} 
-               />
-               <View style={{ marginLeft: 12, flex: 1 }}>
-                 <Text style={[styles.activityText, { color: theme.text, fontWeight: '500' }]} numberOfLines={1}>
-                   {task.text}
-                 </Text>
-                 <Text style={{ fontSize: 12, color: theme.subText }}>
-                   {task.pomodoroCount} 🍅 • {task.completed ? t('stat_cards.completed') : t('stat_cards.pending')}
-                 </Text>
-               </View>
-            </View>
-           ))
-         ) : (
-           <View style={{ padding: 30, alignItems: 'center' }}>
-              <Ionicons name="stats-chart-outline" size={40} color={theme.subText} style={{ opacity: 0.5 }} />
-              <Text style={{ marginTop: 8, color: theme.subText }}>
-                {t('task_details.task_empty')}
-              </Text>
-           </View>
-         )}
+      <View style={{ marginTop: 24 }}>
+        <Text style={[styles.subHeader, { color: theme.text, fontWeight: '700', marginBottom: 12 }]}>
+          {t('stats.recent_activity', 'Hoạt động gần đây')}
+        </Text>
+        
+        <View style={{ 
+          backgroundColor: theme.card, 
+          borderRadius: 20,
+          padding: 8,
+          borderWidth: 1,
+          borderColor: theme.border
+        }}>
+           {recentActivities.length > 0 ? (
+             recentActivities.map((task, index) => (
+              <View 
+                key={task.id} 
+                style={{ 
+                  flexDirection: 'row', 
+                  alignItems: 'center', 
+                  padding: 12,
+                  borderBottomWidth: index === recentActivities.length - 1 ? 0 : 0.5,
+                  borderBottomColor: theme.border
+                }}
+              >
+                 <View style={{ 
+                   width: 38, height: 38, borderRadius: 12, 
+                   backgroundColor: task.completed ? '#4CAF5015' : '#FFA00015',
+                   justifyContent: 'center', alignItems: 'center'
+                 }}>
+                   <Ionicons 
+                     name={task.completed ? "checkmark-circle" : "sync-circle"} 
+                     size={22} 
+                     color={task.completed ? "#4CAF50" : "#FFA000"} 
+                   />
+                 </View>
+
+                 <View style={{ marginLeft: 12, flex: 1 }}>
+                   <Text style={{ color: theme.text, fontWeight: '600' }} numberOfLines={1}>
+                     {task.text}
+                   </Text>
+                   <Text style={{ fontSize: 12, color: theme.subText }}>
+                     {task.pomodoroCount} 🍅 • {task.completed ? t('stat_cards.completed') : t('stat_cards.pending')}
+                   </Text>
+                 </View>
+              </View>
+             ))
+           ) : (
+             <View style={{ padding: 40, alignItems: 'center' }}>
+                <Ionicons name="leaf-outline" size={40} color={theme.subText} style={{ opacity: 0.3 }} />
+                <Text style={{ color: theme.subText, marginTop: 8 }}>{t('task_details.task_empty')}</Text>
+             </View>
+           )}
+        </View>
       </View>
     </ScrollView>
   );
