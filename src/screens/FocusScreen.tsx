@@ -4,9 +4,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, TouchableOpacity, View } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { useLocalSearchParams } from 'expo-router';
 
 // Firebase
-import { db } from '@/api/firebaseConfig';
+import { db } from '@/config/firebaseConfig';
 import { addDoc, collection, doc, increment, serverTimestamp, updateDoc } from "firebase/firestore";
 
 // Context & Hooks
@@ -18,12 +19,21 @@ import { useTaskLogic } from '../hooks/useTaskLogic';
 import { SuccessConfetti } from '@/components/common/SuccessConfetti';
 import { GradientLoader } from '@/components/pomodoro/GradientLoader';
 import { ModeSelector } from '@/components/pomodoro/ModeSelector';
-import { QuoteDisplay } from '@/components/pomodoro/QuoteDisplay';
+import { QuoteDisplay } from '@/components/pomodoro/Quotes';
 import { styles } from '@/styles/PomodoroStyles';
+
+import { Colors } from '../constants/theme';
+
+import { MusicControl } from '../components/common/MusicControl';
+import { useMusicPlayer } from '../hooks/useMusicPlayer';
+
 
 export default function FocusScreen() {
   const { t } = useTranslation();
-  const { selectedTaskId, isDarkMode, user, incrementTaskPomodoro } = useAppContext();
+  const { taskId } = useLocalSearchParams();
+  const { 
+    selectedTaskId, setSelectedTaskId, 
+    isDarkMode, user, incrementTaskPomodoro } = useAppContext();
   const { 
     time, isActive, mode, pomodoroCount, setIsActive, changeMode, 
     formatTime, totalSeconds, handleFinishTask,
@@ -32,19 +42,39 @@ export default function FocusScreen() {
   const { taskList } = useTaskLogic();
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const activeTask = useMemo(() => 
-    taskList.find(t => t.id === selectedTaskId), [taskList, selectedTaskId]);
+  // Đồng bộ Task từ Params ---
+  useEffect(() => {
+    if (taskId && taskId !== selectedTaskId) {
+      setSelectedTaskId(taskId as string);
+      
+      // Nếu muốn: Tự động nhấn Start khi vừa bấm "Tập trung" từ màn hình kia
+      // setIsActive(true); 
+    }
+  }, [taskId]);
 
-  // 1. Logic màu sắc dạng Mảng [Màu chính, Màu phụ] để làm Gradient
+  const activeTask = useMemo(() => 
+    taskList.find(t => t.id === (taskId || selectedTaskId)), 
+  [taskList, selectedTaskId]);
+
+  const { isMuted, setIsMuted, nextTrack, currentTrackTitle } = useMusicPlayer(isActive);
+
+  // 1. Logic màu sắc dạng Mảng [Màu chính, Màu phụ] cho Gradient
   const modeColors: [string, string] = useMemo(() => {
-    if (mode === 'WORK') {
-      return isDarkMode ? ['#7F1D1D', '#B91C1C'] : ['#F55656', '#FF8A80'];
+    const theme = isDarkMode ? Colors.dark : Colors.light;
+
+    switch (mode) {
+      case 'WORK':
+        return [theme.primary, theme.accentGradient]; 
+
+      case 'SHORT_BREAK':
+        return [theme.secondary, theme.longBreakGradient];
+
+      case 'LONG_BREAK':
+        return [theme.longBreak, theme.primaryGradient];
+
+      default:
+        return [theme.primary, theme.accent];
     }
-    const isShort = mode === 'SHORT_BREAK';
-    if (isDarkMode) {
-      return isShort ? ['#064E3B', '#059669'] : ['#082063', '#1D4ED8'];
-    }
-    return isShort ? ['#4CAF50', '#81C784'] : ['#408ece', '#64B5F6']; 
   }, [mode, isDarkMode]);
 
   // Màu nền Container (Lấy màu đầu tiên trong mảng)
@@ -56,16 +86,23 @@ export default function FocusScreen() {
   const savePomodoroSession = async () => {
     if (mode !== 'WORK' || !user) return;
     try {
+      const currentTaskText = activeTask?.text || "Tập trung tự do";
+      const currentTaskId = activeTask?.id || selectedTaskId;
+
       await addDoc(collection(db, "sessions"), {
-        userId: user.id,
+        userId: user.uid,
         userName: user.name || "User",
         taskText: activeTask?.text || "Tập trung tự do",
         duration: Math.floor(totalSeconds / 60), 
         createdAt: serverTimestamp(),
       });
-      const userRef = doc(db, "users", user.id);
-      await updateDoc(userRef, { totalMinutes: increment(Math.floor(totalSeconds / 60)) });
-      if (selectedTaskId) incrementTaskPomodoro(selectedTaskId);
+
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, { 
+        totalMinutes: increment(Math.floor(totalSeconds / 60)) 
+      });
+      
+      if (currentTaskId) incrementTaskPomodoro(currentTaskId);
     } catch (error) { console.error("Lỗi lưu dữ liệu:", error); }
   };
   
@@ -80,11 +117,11 @@ export default function FocusScreen() {
 
   const progress = time / totalSeconds; // 1 -> 0
 
+
   return (
     <Animated.View style={[styles.container, animatedContainer]}>
       <QuoteDisplay mode={mode} pomodoroCount={pomodoroCount} />
       
-      {/* Cập nhật ModeSelector với màu accent */}
       <ModeSelector 
         mode={mode} 
         changeMode={changeMode} 
@@ -97,20 +134,28 @@ export default function FocusScreen() {
       />
       
       <View style={styles.circleContainer}>
-        {/* Cập nhật GradientLoader với mảng màu colors */}
         <GradientLoader 
           isActive={isActive} 
           progress={progress} 
           colors={modeColors} 
+          isDarkMode={isDarkMode}
         />
         <View style={[
           styles.innerCircle, 
-          { backgroundColor: isDarkMode ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.05)' }
+          { 
+            backgroundColor: isDarkMode ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.1)',
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.2)'
+          }
         ]}>
           <Text style={styles.timeText}>{formatTime(time)}</Text>
+          <Text style={{ color: '#fff', opacity: 0.6, fontSize: 12, fontWeight: '600' }}>
+            {mode === 'WORK' ? 'FOCUS' : 'REST'}
+          </Text>
         </View>
       </View>
 
+      
       <View style={styles.buttonRow}>
         <TouchableOpacity 
           style={styles.button} 
@@ -119,7 +164,7 @@ export default function FocusScreen() {
             setIsActive(!isActive);
           }}
         >
-          {/* Chữ Start/Pause đổi màu theo Mode chính */}
+          {/* <Ionicons name={isActive ? "pause" : "play"} size={24} color={modeColors[0]} /> */}
           <Text style={[styles.buttonText, { color: modeColors[0] }]}>
             {isActive ? t('pomodoro.pause') : t('pomodoro.start')}
           </Text>
@@ -157,16 +202,27 @@ export default function FocusScreen() {
         )}
       </View>
 
-      <SuccessConfetti 
-        isActive={showConfetti} 
-        onAnimationEnd={() => setShowConfetti(false)} 
-      />
+      <View style={{ marginVertical: 10, alignItems: 'center' }}>
+        <MusicControl 
+          isMuted={isMuted}
+          setIsMuted={setIsMuted}
+          nextTrack={nextTrack}
+          title={currentTrackTitle}
+          isDarkMode={isDarkMode}
+          isActive={isActive}
+        />
+      </View>
 
       <View style={styles.statsContainer}>
         <Text style={styles.statsText}>
           {t('pomodoro.sessions', { count: pomodoroCount })}
         </Text>
       </View>
+
+      <SuccessConfetti 
+        isActive={showConfetti} 
+        onAnimationEnd={() => setShowConfetti(false)} 
+      />
     </Animated.View>
   );
 }

@@ -1,11 +1,10 @@
-import React from 'react';
-import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Text, View } from 'react-native';
 
-// Lấy theme từ Context
 import { useAppContext } from '@/context/AppContext';
-import { styles } from '../../styles/StatsStyles';
+import { styles } from './styles';
 
 interface StatCardsProps {
   totalPomodoros: number;
@@ -15,7 +14,7 @@ interface StatCardsProps {
 
 export const StatCards = ({ totalPomodoros, completedTasks, pendingTasks }: StatCardsProps) => {
   const { t } = useTranslation();
-  const { theme } = useAppContext(); // Lấy theme (light/dark) từ context
+  const { theme } = useAppContext(); 
 
   return (
     <View style={styles.statsGrid}>

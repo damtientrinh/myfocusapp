@@ -15,6 +15,7 @@ i18n.use(initReactI18next).init({
   interpolation: {
     escapeValue: false // React đã tự bảo mật chống XSS rồi
   },
+  debug: false,
 });
 
 export default i18n;

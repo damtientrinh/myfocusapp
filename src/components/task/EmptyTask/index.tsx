@@ -1,20 +1,18 @@
-import React from 'react';
-import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Text, View } from 'react-native';
 
-import { useAppContext } from '../../context/AppContext';
 import { useTranslation } from 'react-i18next';
+import { useAppContext } from '../../../context/AppContext';
 
-import { styles } from '../../styles/TaskStyles'; 
+import { styles } from './styles';
 
 export const EmptyTask = () => {
-  // Trình lấy thêm fonts và spacing từ Context ra nhé
   const { theme, fonts, spacing, isDarkMode } = useAppContext();
   const { t } = useTranslation();
 
   return (
     <View style={[styles.empty_container, { paddingVertical: spacing.xl * 2 }]}>
-      {/* Vòng tròn Icon - Dùng theme.card để nó nổi nhẹ lên trên nền background */}
       <View style={[
         styles.iconCircle, 
         { 
@@ -25,7 +23,6 @@ export const EmptyTask = () => {
           justifyContent: 'center',
           alignItems: 'center',
           marginBottom: spacing.lg,
-          // Đổ bóng nhẹ cho đẹp
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.05,
@@ -34,9 +31,9 @@ export const EmptyTask = () => {
         }
       ]}>
         <Ionicons 
-            name="document-text-outline" // Thay clipboard bằng document nhìn hiện đại hơn
+            name="document-text-outline" 
             size={50} 
-            color={theme.primary} // Dùng màu đỏ đặc trưng của Trình làm điểm nhấn
+            color={theme.primary} 
             style={{ opacity: 0.8 }}
         />
       </View>
@@ -46,7 +43,7 @@ export const EmptyTask = () => {
         styles.title, 
         { 
           color: theme.text, 
-          fontFamily: fonts.rounded, // Font bo tròn cho thân thiện
+          fontFamily: fonts.rounded,
           fontSize: 20,
           fontWeight: '700',
           textAlign: 'center',

@@ -1,20 +1,22 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Text } from 'react-native';
 import Animated, {
-  interpolate, useAnimatedStyle, useSharedValue,
-  withTiming, runOnJS,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle, useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 
-import { getRandomQuote } from '../../constants/Quotes';
-import { styles } from '../../styles/PomodoroStyles';
 import { useAppContext } from '@/context/AppContext'; // Để lấy fonts
+import { getRandomQuote } from '../../../constants/Quotes';
+import { styles } from './styles';
 
 interface Props {
   mode: 'WORK' | 'SHORT_BREAK' | 'LONG_BREAK'; // Fix type cụ thể
   pomodoroCount: number;
 }
 
-export const QuoteDisplay = ({ mode }: Props) => {
+export const QuoteDisplay = ({ mode, pomodoroCount }: Props) => {
   const { fonts } = useAppContext();
   const opacity = useSharedValue(1);
   const [displayQuote, setDisplayQuote] = useState(getRandomQuote(mode)); // Khởi tạo trực tiếp để tránh null
@@ -35,14 +37,12 @@ export const QuoteDisplay = ({ mode }: Props) => {
       return;
     }
 
-    // Bước A: Mờ dần và trượt xuống
     opacity.value = withTiming(0, { duration: 400 }, (finished) => {
       if (finished) {
-        // Bước B: Sau khi mờ hẳn, đổi chữ và hiện lên lại
         runOnJS(changeQuoteText)();
       }
     });
-  }, [mode]); 
+  }, [mode, pomodoroCount]); 
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -56,7 +56,10 @@ export const QuoteDisplay = ({ mode }: Props) => {
   if (!displayQuote) return null;
 
   return (
-    <Animated.View style={[styles.quoteContainer, animatedStyle]}>
+    <Animated.View style={[
+      styles.quoteContainer, animatedStyle,
+      { height: 80, justifyContent: 'center' }
+      ]}>
       <Text style={[styles.quoteText, { fontFamily: fonts.sans }]}>
         “{displayQuote}”
       </Text>

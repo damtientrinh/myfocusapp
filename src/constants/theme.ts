@@ -7,9 +7,19 @@ import { Platform } from 'react-native';
 export const Colors = {
   light: {
     // Màu chủ đạo & Trạng thái Pomodoro
-    primary: '#FF5252',     // Đỏ (Focus/Work) - Màu thương hiệu của Trình
-    secondary: '#4CAF50',   // Xanh lá (Short Break)
-    accent: '#FFD700',      // Vàng (Long Break/Achievement)
+    primary: '#FF5252',     
+    primaryGradient: '#FF867A', // Đỏ cam nhạt (Phối với Đỏ)
+    
+    secondary: '#4CAF50',   
+    secondaryGradient: '#81C784', // Xanh lá sáng (Phối với Xanh lá)
+    
+    accent: '#FFD700',      
+    accentGradient: '#FFF176',  // Vàng chanh (Phối với Vàng)
+    
+    // Thêm màu cho Long Break nếu cần khác biệt
+    longBreak: '#2196F3',
+    longBreakGradient: '#64B5F6',     
+
     
     // Nội dung & Nền
     text: '#11181C',        // Chữ chính (Đen đậm)
@@ -29,8 +39,16 @@ export const Colors = {
   dark: {
     // Màu chủ đạo (Nhạt hơn một chút để đỡ chói trong tối)
     primary: '#FF6B6B',
+    primaryGradient: '#EE0979', // Hồng tím Neon (Cực cháy khi đi với Đỏ)
+    
     secondary: '#81C784',
+    secondaryGradient: '#2AF598', // Xanh ngọc (Phối với Xanh lá nhìn rất Tech)
+    
     accent: '#FFF176',
+    accentGradient: '#FFA726',  // Cam lửa (Phối với Vàng tạo độ ấm)
+    
+    longBreak: '#1E88E5',
+    longBreakGradient: '#00D2FF', // Xanh Cyan (Phối với Blue)
     
     // Nội dung & Nền (Deep Black cho màn hình AMOLED)
     text: '#ECEDEE',
@@ -84,7 +102,6 @@ export const Fonts = {
 
 /**
  * 3. KÍCH THƯỚC & KHOẢNG CÁCH (SPACING)
- * Giúp UI của cả nhóm (Trình, Minh, Mạnh) luôn đồng bộ
  */
 export const Spacing = {
   xs: 4,
@@ -114,4 +131,21 @@ export const FontWeight = {
   semiBold: '600' as const,
   bold: '700' as const,
   extraBold: '800' as const,
+};
+
+export const Shadows = {
+  light: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3, // Dành cho Android
+  },
+  dark: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
+  }
 };

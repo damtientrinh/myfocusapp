@@ -1,5 +1,5 @@
 import { StyleSheet, Dimensions, Platform } from 'react-native';
-import { Spacing, Fonts } from '../constants/theme'; 
+import { Spacing, Fonts, FontWeight, Shadows } from '../constants/theme'; 
 
 const { width } = Dimensions.get('window');
 
@@ -11,47 +11,6 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between', 
     paddingVertical: Spacing.xl,
     paddingHorizontal: Spacing.lg,
-  },
-
-  // 2. Mode Selector (Thanh trượt chọn Work/Break)
-  modeRow: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.15)', 
-    borderRadius: 25,
-    height: 50,
-    alignSelf: 'center',
-    position: 'relative',
-    overflow: 'hidden',
-    marginTop: Spacing.md,
-    width: width * 0.9, 
-  },
-  activeIndicator: {
-    position: 'absolute',
-    height: '80%', 
-    top: '10%',
-    backgroundColor: '#FFF', 
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  modeButton: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2, 
-  },
-  modeText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontFamily: Fonts.rounded,
-  },
-  modeTextActive: {
-    color: '#000', 
-    fontWeight: '700',
   },
 
   // 3. Vòng tròn đồng hồ (Timer Circle)
@@ -69,15 +28,16 @@ export const styles = StyleSheet.create({
     borderRadius: 200,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.25)',
+    position: 'absolute',
   },
   timeText: {
     fontSize: 80,
     color: '#FFF',
     fontFamily: Fonts.mono, 
-    fontWeight: '700',
+    fontWeight: FontWeight.semiBold,
     fontVariant: ['tabular-nums'],
   },
 
@@ -91,13 +51,12 @@ export const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 40,
-    paddingVertical: 15,
-    borderRadius: 30, // Bo tròn hoàn toàn
-    minWidth: 160,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 30, 
+    minWidth: 140,
     alignItems: 'center',
     justifyContent: 'center',
-    // Đổ bóng cho nút (Shadow)
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -105,10 +64,10 @@ export const styles = StyleSheet.create({
     elevation: 5, 
   },
   buttonText: {
-    fontSize: 18,
-    fontWeight: '700', // Đậm hơn để dễ nhìn
-    letterSpacing: 1,  // Khoảng cách chữ rộng ra chút cho thoáng
-    textTransform: 'uppercase', // Viết hoa cho chuyên nghiệp
+    fontSize: 14,
+    fontWeight: FontWeight.medium,
+    letterSpacing: 1, 
+    textTransform: 'uppercase', 
   },
 
   // 5. Khu vực Task đang chọn (Task Info Area)
@@ -116,7 +75,7 @@ export const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     gap: Spacing.sm,
-    minHeight: 80,
+    minHeight: 40,
   },
   activeTaskBadge: {
     paddingVertical: Spacing.sm,
@@ -145,31 +104,21 @@ export const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // 6. Thống kê & Quotes
   statsContainer: {
-    backgroundColor: 'rgba(0,0,0,0.15)',
-    paddingVertical: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)', 
+    paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    marginBottom: Platform.OS === 'ios' ? 20 : 10,
+    // marginTop: 10,
+    alignSelf: 'center', // Căn giữa container
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
+
   statsText: {
-    color: '#FFF',
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
-    fontFamily: Fonts.sans,
-  },
-  quoteContainer: {
-    paddingHorizontal: Spacing.xl,
-    marginTop: Platform.OS === 'ios' ? 50 : 20,
-    alignItems: 'center',
-  },
-  quoteText: {
-    fontSize: 16,
-    fontStyle: 'italic',
     textAlign: 'center',
-    color: 'rgba(255, 255, 255, 0.95)',
-    fontFamily: Fonts.sans,
-    lineHeight: 24,
-  }
+  },
 });

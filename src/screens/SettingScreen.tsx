@@ -3,62 +3,69 @@ import Slider from '@react-native-community/slider';
 import * as Haptics from 'expo-haptics';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { 
+  Platform, Alert, Image, ScrollView, Switch, 
+  Text, TouchableOpacity, View, StatusBar
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-import { auth } from '../api/firebaseConfig';
-import { signOut } from 'firebase/auth';
-
-import { styles } from '@/styles/SettingsStyles'; 
 import { useAppContext } from '@/context/AppContext';
+import { styles } from '@/styles/SettingsStyles';
 
 export default function SettingScreen() {
+  const navigation = useNavigation<any>();
   const { 
     isDarkMode, setIsDarkMode, theme, customWorkTime, setCustomWorkTime,
     language, setLanguage, resetSettings,
-    setUser, user
+    user, logout 
   } = useAppContext();
 
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
+  const handlePressProfile = () => {
+    Haptics.selectionAsync(); 
+    navigation.navigate('Profile');
+  };
+
+  // Rung khi đổi ngôn ngữ
   const toggleLanguage = () => {
     const newLang = language === 'vi' ? 'en' : 'vi';
     setLanguage(newLang);
-    i18n.changeLanguage(newLang);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); 
   };
 
-  const handleReset = () => {
+  // Thêm Alert xác nhận cho Reset Settings (UX tốt hơn)
+  const handleResetConfirm = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert(
-      t('settings.reset_settings', 'Đặt lại cài đặt'),
-      t('settings.reset_confirm', 'Bạn có chắc chắn muốn đưa tất cả cài đặt về mặc định?'),
+      t('settings.reset_settings'),
+      t('settings.reset_confirm'),
       [
-        { text: t('common.cancel', 'Hủy'), style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         { 
-          text: t('common.confirm', 'Xác nhận'), 
-          onPress: resetSettings,
-          style: 'destructive' 
+          text: t('common.confirm'), 
+          onPress: () => {
+            resetSettings();
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          }
         }
       ]
     );
   };
 
   const handleLogout = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy); 
     Alert.alert(
-      t('settings.logout_title', 'Đăng xuất'),
-      t('settings.logout_confirm', 'Bạn có chắc chắn muốn đăng xuất không?'),
+      t('settings.logout_title'),
+      t('settings.logout_confirm'),
       [
-        { text: t('common.cancel', 'Hủy'), style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         { 
-          text: t('common.confirm', 'Xác nhận'), 
+          text: t('common.confirm'), 
           style: 'destructive',
           onPress: async () => {
-            try {
-              await signOut(auth); // Đăng xuất khỏi Firebase
-              setUser(null); 
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            } catch (error) {
-              console.error("Logout error:", error);
-            }
+            await logout();
+            // AppContext.logout đã có sẵn Haptics.Success
           }
         }
       ]
@@ -70,114 +77,169 @@ export default function SettingScreen() {
     borderColor: theme.border,
   };
 
-  return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
-      <Text style={[styles.header, { color: theme.text }]}>
-        {t('settings.header', 'Cài đặt')}
-      </Text>
 
-      {/* NHÓM 1: CẤU HÌNH POMODORO */}
+
+  return (
+    <ScrollView 
+      style={[styles.container, { backgroundColor: theme.background }]}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* --- PROFILE HEADER --- */}
       <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionHeaderText, { color: theme.subText }]}>POMODORO</Text>
+        <Text style={[styles.sectionHeaderText, { color: theme.subText }]}>
+          {t('settings.sections.profile')}
+        </Text>
+      </View>
+
+        <TouchableOpacity 
+          activeOpacity={0.7}
+          onPress={handlePressProfile} 
+          style={[styles.profileCard, { backgroundColor: theme.card, padding: 20, borderRadius: 24, marginBottom: 10 }]}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {user?.photoURL ? (
+              <Image source={{ uri: user.photoURL }} style={{ width: 64, height: 64, borderRadius: 32 }} />
+            ) : (
+              <View style={[styles.iconCircle, { width: 64, height: 64, borderRadius: 32, backgroundColor: '#FF525215' }]}>
+                <Ionicons name="person" size={32} color="#FF5252" />
+              </View>
+            )}
+            <View style={{ marginLeft: 16, flex: 1 }}>
+              <Text style={{ color: theme.text, fontSize: 18, fontWeight: '800' }}>
+                {user?.displayName || 'Đàm Tiến Trình'}
+              </Text>
+              <Text style={{ color: theme.subText, fontSize: 14, marginTop: 2 }}>
+                {user?.email || 'dtt@epu.edu.vn'}
+              </Text>
+            </View>
+
+            <Ionicons name="chevron-forward" size={20} color={theme.subText} />
+          </View>
+
+          {/* Nút Xem chi tiết hồ sơ */}
+          <View 
+            style={{ 
+              marginTop: 15, 
+              paddingVertical: 8, 
+              borderTopWidth: 1, 
+              borderTopColor: theme.border + '50',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <Ionicons name="eye-outline" size={16} color={theme.subText} />
+            <Text style={{ color: theme.subText, marginLeft: 6, fontSize: 13 }}>
+              {t('settings.view_profile')}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+      {/* --- NHÓM 1: POMODORO --- */}
+      <View style={styles.sectionHeader}>
+        <Text style={[styles.sectionHeaderText, { color: theme.subText }]}>{t('settings.sections.pomodoro')}</Text>
       </View>
       
       <View style={[styles.section, dynamicSectionStyle]}>
         <View style={styles.row}>
-          <View style={styles.iconCircle}>
-            <Ionicons name="time" size={20} color="#FF5252" />
+          <View style={[styles.iconCircle, { backgroundColor: '#FF525215' }]}>
+            <Ionicons name="timer-outline" size={22} color="#FF5252" />
           </View>
-          <Text style={[styles.title, { color: theme.text }]}>
-            {t('settings.work_time', 'Thời gian làm việc')}
-          </Text>
-          <Text style={[styles.valueText, { color: '#FF5252', fontWeight: 'bold' }]}>
-            {customWorkTime} {t('settings.minutes', 'phút')}
+          <Text style={[styles.title, { color: theme.text }]}>{t('settings.work_time')}</Text>
+          <Text style={[styles.valueText, { color: '#FF5252', fontWeight: '900' }]}>
+            {customWorkTime} {t('settings.minutes')}
           </Text>
         </View>
         
         <Slider
-          style={styles.slider}
-          minimumValue={5}
+          style={{ width: '100%', height: 45 }}
+          minimumValue={15}
           maximumValue={60}
           step={5}
           value={customWorkTime}
-          onValueChange={setCustomWorkTime}
+          onSlidingComplete={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+          onValueChange={(val) => {
+            setCustomWorkTime(val);
+            // Rung nhẹ khi trượt qua các mốc step
+            if (Platform.OS === 'ios') Haptics.selectionAsync();
+          }}
           minimumTrackTintColor="#FF5252"
           maximumTrackTintColor={theme.border}
           thumbTintColor="#FF5252"
         />
       </View>
 
-      {/* NHÓM 2: GIAO DIỆN */}
+      {/* --- NHÓM 2: GIAO DIỆN --- */}
       <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionHeaderText, { color: theme.subText }]}>
-          {t('settings.sections.appearance', 'GIAO DIỆN')}
-        </Text>
+        <Text style={[styles.sectionHeaderText, { color: theme.subText }]}>{t('settings.sections.appearance')}</Text>
       </View>
       
       <View style={[styles.section, dynamicSectionStyle]}>
-        {/* Dark Mode */}
         <View style={styles.row}>
           <View style={[styles.iconCircle, { backgroundColor: isDarkMode ? '#333' : '#eee'}]}>
             <Ionicons 
               name={isDarkMode ? "moon" : "sunny"} 
-              size={20} 
+              size={22} 
               color={isDarkMode ? "#FFD700" : "#FF5252"} 
             />
           </View>
-          <Text style={[styles.title, { color: theme.text, flex: 1 }]}>
-            {isDarkMode ? t('settings.dark_mode', 'Chế độ tối') : t('settings.light_mode', 'Chế độ sáng')}
-          </Text>
+          <Text style={[styles.title, { color: theme.text, flex: 1 }]}>{t('settings.dark_mode')}</Text>
           <Switch
             value={isDarkMode}
-            onValueChange={setIsDarkMode}
+            onValueChange={(val) => {
+              setIsDarkMode(val);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            }}
             trackColor={{ false: "#767577", true: "#FF5252" }}
+            thumbColor={Platform.OS === 'android' ? '#fff' : ''}
           />
         </View>
 
-        {/* Ngôn ngữ */}
         <TouchableOpacity 
           onPress={toggleLanguage} 
-          style={[styles.row, { borderTopWidth: 1, borderTopColor: theme.border, paddingTop: 15, marginTop: 10 }]}
+          style={[styles.row, { borderTopWidth: 1, borderTopColor: theme.border, paddingTop: 12, marginTop: 12 }]}
         >
-          <View style={[styles.iconCircle, { backgroundColor: isDarkMode ? '#333' : '#f0f0f0'}]}>
-            <Ionicons name="language" size={20} color="#FF5252" />
+          <View style={[styles.iconCircle, { backgroundColor: '#FF525210' }]}>
+            <Ionicons name="globe-outline" size={22} color="#FF5252" />
           </View>
-          <Text style={[styles.title, { color: theme.text, flex: 1 }]}>
-            {t('settings.language', 'Ngôn ngữ')}
-          </Text>
-          <Text style={{ color: theme.subText, marginRight: 5 }}>
-            {language === 'vi' ? 'Tiếng Việt' : 'English'}
-          </Text>
-          <Ionicons name="chevron-forward" size={16} color={theme.subText} />
+          <Text style={[styles.title, { color: theme.text, flex: 1 }]}>{t('settings.language')}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={{ color: theme.subText, marginRight: 8, fontSize: 15 }}>
+              {language === 'vi' ? 'Tiếng Việt' : 'English'}
+            </Text>
+            <Ionicons name="chevron-forward" size={18} color={theme.subText} />
+          </View>
         </TouchableOpacity>
       </View>
 
-      {/* NHÓM 3: TÀI KHOẢN & HỆ THỐNG */}
+      {/* --- NHÓM 3: HỆ THỐNG --- */}
       <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionHeaderText, { color: theme.subText }]}>HỆ THỐNG</Text>
+        <Text style={[styles.sectionHeaderText, { color: theme.subText }]}>{t('settings.sections.system')}</Text>
       </View>
 
       <View style={[styles.section, dynamicSectionStyle]}>
-        {/* Reset */}
-        <TouchableOpacity onPress={handleReset} style={styles.row}>
-          <Ionicons name="reload" size={20} color="#FF5252" style={{ marginRight: 15 }} />
-          <Text style={{ color: theme.text, fontSize: 16 }}>{t('settings.reset_settings')}</Text>
+        <TouchableOpacity onPress={handleResetConfirm} style={styles.row}>
+          <View style={[styles.iconCircle, { backgroundColor: '#eee' }]}>
+            <Ionicons name="refresh-outline" size={22} color="#666" />
+          </View>
+          <Text style={[styles.title, { color: theme.text, flex: 1 }]}>{t('settings.reset_settings')}</Text>
         </TouchableOpacity>
 
-        {/* Đăng xuất */}
         <TouchableOpacity 
           onPress={handleLogout} 
-          style={[styles.row, { borderTopWidth: 1, borderTopColor: theme.border, paddingTop: 15, marginTop: 10 }]}
+          style={[styles.row, { borderTopWidth: 1, borderTopColor: theme.border, paddingTop: 12, marginTop: 12 }]}
         >
-          <Ionicons name="log-out" size={20} color="#FF5252" style={{ marginRight: 15 }} />
-          <Text style={{ color: '#FF5252', fontSize: 16, fontWeight: 'bold' }}>
-            {t('settings.logout_title', 'Đăng xuất')}
+          <View style={[styles.iconCircle, { backgroundColor: '#FF525210' }]}>
+            <Ionicons name="log-out-outline" size={22} color="#FF5252" />
+          </View>
+          <Text style={{ color: '#FF5252', fontSize: 16, fontWeight: 'bold', flex: 1 }}>
+            {t('settings.logout_title')}
           </Text>
         </TouchableOpacity>
       </View>
 
-      <Text style={[styles.footerText, { color: theme.subText, marginBottom: 40 }]}>
-        {t('settings.version', 'Phiên bản 1.0.0 • Made with ❤️ by DTT')}
+      <Text style={[styles.footerText, { color: theme.subText, textAlign: 'center' }]}>
+        {t('settings.version')}
       </Text>
     </ScrollView>
   );

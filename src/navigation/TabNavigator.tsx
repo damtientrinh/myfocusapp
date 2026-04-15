@@ -1,12 +1,9 @@
-import React from 'react';
+import React, { memo } from 'react'; 
 import { Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAppContext } from '@/context/AppContext';
-
-// Icons
 import { BarChart2, ListTodo, Settings, Timer, Users } from 'lucide-react-native';
 
-// Screens
 import FocusScreen from '@/screens/FocusScreen';
 import SettingScreen from '@/screens/SettingScreen';
 import SocialScreen from '@/screens/SocialScreen';
@@ -15,74 +12,58 @@ import TaskScreen from '@/screens/TaskScreen';
 
 const Tab = createBottomTabNavigator();
 
-export const TabNavigator = () => {
+const TabIcon = ({ IconComponent, color, focused }: any) => (
+  <IconComponent size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
+);
+
+export const TabNavigator = memo(() => {
   const { theme, fonts, spacing } = useAppContext();
 
   return (
     <Tab.Navigator
+      initialRouteName='Tasks'
       screenOptions={{
-        // 1. Màu sắc linh hoạt
+        // 1. QUAN TRỌNG: Ẩn tiêu đề lặp lại ở phía trên
+        headerShown: false, 
+        
         tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.subText,
-        
-        // 2. Cấu hình Thanh Tab phía dưới
         tabBarStyle: { 
           backgroundColor: theme.card,
           borderTopColor: theme.border,
           borderTopWidth: 1,
           height: Platform.OS === 'ios' ? 88 : 70,
-          paddingBottom: Platform.OS === 'ios' ? 30 : spacing.sm, // Dùng spacing chuẩn
+          paddingBottom: Platform.OS === 'ios' ? 30 : spacing.sm,
           paddingTop: spacing.xs + 4,
-          elevation: 0,
-          shadowOpacity: 0,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         },
-        
-        // Style cho nhãn chữ dưới icon
         tabBarLabelStyle: {
           fontFamily: fonts.sans,
           fontSize: 12,
-          fontWeight: '500',
+          fontWeight: '600',
+          marginBottom: 4,
         },
-
-        // 3. Cấu hình Header phía trên
-        headerStyle: { 
-          backgroundColor: theme.card,
-          elevation: 0,
-          shadowOpacity: 0,
-          borderBottomWidth: 1,
-          borderBottomColor: theme.border,
-        },
-        headerTitleStyle: { 
-          color: theme.text,
-          fontFamily: fonts.rounded, // Dùng font bo tròn cho Header
-          fontWeight: '700',
-          fontSize: 18,
-        },
-        headerTitleAlign: 'center',
-        headerShown: true,
       }}
     >
-      <Tab.Screen 
-        name="Focus" 
-        component={FocusScreen} 
-        options={{ 
-          title: 'Tập trung',
-          tabBarLabel: 'Tập trung',
-          tabBarIcon: ({color, focused}) => (
-            <Timer size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-          )
-        }}
-      />
-      
       <Tab.Screen 
         name="Tasks" 
         component={TaskScreen} 
         options={{ 
-          title: 'Nhiệm vụ',
           tabBarLabel: 'Nhiệm vụ',
-          tabBarIcon: ({color, focused}) => (
-            <ListTodo size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-          )
+          tabBarIcon: (props) => <TabIcon IconComponent={ListTodo} {...props} />
+        }}
+      />
+
+      <Tab.Screen 
+        name="Focus" 
+        component={FocusScreen} 
+        options={{ 
+          tabBarLabel: 'Tập trung',
+          tabBarIcon: (props) => <TabIcon IconComponent={Timer} {...props} />
         }}
       />
       
@@ -90,11 +71,8 @@ export const TabNavigator = () => {
         name="Stats" 
         component={StatsScreen} 
         options={{ 
-          title: 'Thống kê',
           tabBarLabel: 'Thống kê',
-          tabBarIcon: ({color, focused}) => (
-            <BarChart2 size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-          )
+          tabBarIcon: (props) => <TabIcon IconComponent={BarChart2} {...props} />
         }}
       />
       
@@ -102,11 +80,8 @@ export const TabNavigator = () => {
         name="Social" 
         component={SocialScreen} 
         options={{ 
-          title: 'Xếp hạng',
           tabBarLabel: 'Xếp hạng',
-          tabBarIcon: ({color, focused}) => (
-            <Users size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-          )
+          tabBarIcon: (props) => <TabIcon IconComponent={Users} {...props} />
         }}
       />
       
@@ -114,13 +89,10 @@ export const TabNavigator = () => {
         name="Settings" 
         component={SettingScreen} 
         options={{ 
-          title: 'Cài đặt',
           tabBarLabel: 'Cài đặt',
-          tabBarIcon: ({color, focused}) => (
-            <Settings size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-          )
+          tabBarIcon: (props) => <TabIcon IconComponent={Settings} {...props} />
         }}
       />
     </Tab.Navigator>
   );
-};
+});

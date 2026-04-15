@@ -1,0 +1,90 @@
+import { StyleSheet } from "react-native";
+
+export const authStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F4F7F9",
+    justifyContent: "center",
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    padding: 20,
+  },
+  logo: {
+    fontSize: 70,
+    textAlign: "center",
+    marginBottom: 5,
+  },
+  appName: {
+    fontSize: 28,
+    textAlign: "center",
+    fontWeight: "800",
+    color: "#2D3436",
+    marginBottom: 30,
+    letterSpacing: 1,
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    padding: 25,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 15,
+    elevation: 8,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#2D3436",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#636E72",
+    textAlign: "center",
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  input: {
+    backgroundColor: "#F9FAFB",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 15,
+    fontSize: 16,
+    color: "#2D3436",
+  },
+  button: {
+    backgroundColor: "#FF6347",
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 5,
+    shadowColor: "#FF6347",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
+  footerLink: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  linkText: {
+    fontSize: 14,
+    color: "#636E72",
+  },
+  linkHighlight: {
+    color: "#FF6347",
+    fontWeight: "bold",
+  },
+});
