@@ -36,8 +36,10 @@ export const StatCards = ({ totalPomodoros, completedTasks, pendingTasks }: Stat
       <View style={[styles.longCard, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
         <Ionicons name="hourglass-outline" size={24} color={theme.subText} />
         <Text style={[styles.statLabel, { color: theme.text }]}>
-          {t('stat_cards.pending')} 
-          <Text style={[styles.boldText, { color: theme.primary || '#f55656' }]}> {pendingTasks} </Text> 
+          {t('stat_cards.pending')}{" "}
+          <Text style={[styles.boldText, { color: theme.primary || '#f55656' }]}> 
+            {pendingTasks} 
+          </Text>
           {t('stat_cards.tasks_unit')}
         </Text>
       </View>

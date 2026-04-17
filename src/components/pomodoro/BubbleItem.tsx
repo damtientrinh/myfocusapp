@@ -23,11 +23,11 @@ export const BubbleItem = ({ baseSize, bubbleY, delay, xPos, progress: waterProg
     const waterLevel = interpolate(waterProgress, [0, 1], [88, 12], Extrapolate.CLAMP);
     
     return {
-      cy: interpolate(p, [0, 1], [95, waterLevel], Extrapolate.CLAMP),
-      opacity: interpolate(p, [0, 0.1, 0.8, 1], [0, 0.3, 0.3, 0], Extrapolate.CLAMP),
-      r: interpolate(p, [0, 1], [baseSize * 0.6, baseSize], Extrapolate.CLAMP),
+      cy: interpolate(p, [0, 1], [95, waterLevel]),
+      opacity: interpolate(p, [0, 0.1, 0.8, 1], [0, 0.3, 0.3, 0]),
+      r: interpolate(p, [0, 1], [baseSize * 0.6, baseSize]),
     };
-  }, [waterProgress]);
+  });
 
   return (
     <AnimatedCircle 

@@ -1,16 +1,26 @@
-import React, { memo } from 'react'; 
-import { Platform } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAppContext } from '@/context/AppContext';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { BarChart2, ListTodo, Settings, Timer, Users } from 'lucide-react-native';
+import React, { memo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Platform } from 'react-native';
 
 import FocusScreen from '@/screens/FocusScreen';
+import RoomsScreen from '@/screens/RoomsScreen';
 import SettingScreen from '@/screens/SettingScreen';
-import SocialScreen from '@/screens/SocialScreen';
 import StatsScreen from '@/screens/StatsScreen';
 import TaskScreen from '@/screens/TaskScreen';
 
-const Tab = createBottomTabNavigator();
+// Định nghĩa Type cho riêng các Tab để hỗ trợ nhắc lệnh (IntelliSense)
+export type TabParamList = {
+  Tasks: undefined;
+  Rooms: undefined;
+  Focus: undefined;
+  Stats: undefined;
+  Settings: undefined;
+};
+
+const Tab = createBottomTabNavigator<TabParamList>();
 
 const TabIcon = ({ IconComponent, color, focused }: any) => (
   <IconComponent size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
@@ -18,14 +28,13 @@ const TabIcon = ({ IconComponent, color, focused }: any) => (
 
 export const TabNavigator = memo(() => {
   const { theme, fonts, spacing } = useAppContext();
+  const { t } = useTranslation();
 
   return (
     <Tab.Navigator
       initialRouteName='Tasks'
       screenOptions={{
-        // 1. QUAN TRỌNG: Ẩn tiêu đề lặp lại ở phía trên
         headerShown: false, 
-        
         tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.subText,
         tabBarStyle: { 
@@ -53,8 +62,17 @@ export const TabNavigator = memo(() => {
         name="Tasks" 
         component={TaskScreen} 
         options={{ 
-          tabBarLabel: 'Nhiệm vụ',
+          tabBarLabel: t('tabs.tasks'), 
           tabBarIcon: (props) => <TabIcon IconComponent={ListTodo} {...props} />
+        }}
+      />
+
+      <Tab.Screen 
+        name="Rooms" 
+        component={RoomsScreen} 
+        options={{ 
+          tabBarLabel: t('tabs.rooms'),
+          tabBarIcon: (props) => <TabIcon IconComponent={Users} {...props} />
         }}
       />
 
@@ -62,7 +80,7 @@ export const TabNavigator = memo(() => {
         name="Focus" 
         component={FocusScreen} 
         options={{ 
-          tabBarLabel: 'Tập trung',
+          tabBarLabel: t('tabs.focus'),
           tabBarIcon: (props) => <TabIcon IconComponent={Timer} {...props} />
         }}
       />
@@ -71,17 +89,8 @@ export const TabNavigator = memo(() => {
         name="Stats" 
         component={StatsScreen} 
         options={{ 
-          tabBarLabel: 'Thống kê',
+          tabBarLabel: t('tabs.stats'),
           tabBarIcon: (props) => <TabIcon IconComponent={BarChart2} {...props} />
-        }}
-      />
-      
-      <Tab.Screen 
-        name="Social" 
-        component={SocialScreen} 
-        options={{ 
-          tabBarLabel: 'Xếp hạng',
-          tabBarIcon: (props) => <TabIcon IconComponent={Users} {...props} />
         }}
       />
       
@@ -89,7 +98,7 @@ export const TabNavigator = memo(() => {
         name="Settings" 
         component={SettingScreen} 
         options={{ 
-          tabBarLabel: 'Cài đặt',
+          tabBarLabel: t('tabs.settings'),
           tabBarIcon: (props) => <TabIcon IconComponent={Settings} {...props} />
         }}
       />

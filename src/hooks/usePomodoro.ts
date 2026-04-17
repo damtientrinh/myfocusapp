@@ -1,10 +1,10 @@
+import { updateUserFocusTime } from '../components/services/userService';
 import { useAppContext } from '@/context/AppContext';
 import * as Haptics from 'expo-haptics';
 import * as Notifications from 'expo-notifications';
-import { useCallback, useEffect, useState } from 'react';
-import { useSharedValue, withTiming } from 'react-native-reanimated';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { InteractionManager } from 'react-native';
+import { useSharedValue } from 'react-native-reanimated';
 
 import { useTaskLogic } from './useTaskLogic';
 
@@ -76,8 +76,6 @@ export const usePomodoro = () => {
   // 4. Xử lý logic khi đồng hồ về 0
   useEffect(() => {
     if (time === 0 && isActive) {
-      // Logic này sẽ được FocusScreen bắt được và gọi savePomodoroSession()
-      // Ở đây ta chỉ xử lý chuyển Mode tự động cho người dùng
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       
       const finishPhase = async () => {
@@ -91,6 +89,16 @@ export const usePomodoro = () => {
         });
 
         if (mode === 'WORK') {
+          const minutesEarned = Math.floor((customWorkTime * 1) / 60);
+          
+          // Gửi lên Firebase
+          try {
+             await updateUserFocusTime(25);
+             console.log("Đã cập nhật bảng xếp hạng thành công!");
+          } catch (error) {
+             console.error("Lỗi cập nhật xếp hạng:", error);
+          }
+          
           const nextCount = pomodoroCount + 1;
           setPomodoroCount(nextCount);
           const nextMode = nextCount % 4 === 0 ? 'LONG_BREAK' : 'SHORT_BREAK';
@@ -110,28 +118,29 @@ export const usePomodoro = () => {
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: t('pomodoro.finish_title', 'Tuyệt vời!'), 
-        body: t('pomodoro.finish_body', 'Bạn đã hoàn thành một nhiệm vụ.'),   
-        sound: true,
-      },
-      trigger: null,
-    });
+    
+    const secondsWorked = totalSeconds - time; 
+    const minutesToUpdate = Math.max(1, Math.floor(secondsWorked / 60)); 
 
     const targetId = selectedTaskId;
     setSelectedTaskId(null); 
     setIsActive(false);
 
-    // Reset thời gian về ban đầu
+    // Reset thời gian
     const resetTime = mode === 'WORK' ? customWorkTime * 1 : MODES[mode];
     setTime(resetTime);
     setTotalSeconds(resetTime);
 
-    // Đợi hiệu ứng UI xong rồi mới update DB (Tránh lag)
     setTimeout(async () => {
       try {
+        // 1. Cập nhật trạng thái Task
         await toggleTask(targetId, true);
+
+        // 2. Phải gọi cập nhật điểm ở đây thì BXH mới nhảy
+        if (mode === 'WORK') {
+           await updateUserFocusTime(1); // Hoặc truyền minutesToUpdate vào
+           console.log("Đã cập nhật điểm từ nút hoàn thành Task!");
+        }
 
         if (onSuccess) onSuccess();
       } catch (e) {

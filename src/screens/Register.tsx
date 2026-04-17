@@ -6,6 +6,7 @@ import {
 } from "react-native";
 import { authStyles as styles } from "../styles/authStyles";
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from "react-i18next"; // 1. Thêm đa ngôn ngữ
 
 // Firebase
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -13,28 +14,29 @@ import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../config/firebaseConfig";
 
 export default function Register({ navigation }: any) {
+  const { t } = useTranslation(); // 2. Khai báo hook t
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   
-  // Trạng thái ẩn hiện mật khẩu
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
 
   const handleRegister = async () => {
     const cleanEmail = email.trim();
 
+    // 3. Sử dụng t() cho các thông báo lỗi
     if (!cleanEmail.includes('@')) {
-      Alert.alert("Thông báo", "Vui lòng nhập đúng định dạng email nhé.");
+      Alert.alert(t('common.notice'), t('auth.error_email_format'));
       return;
     }
     if (password.length < 6) {
-      Alert.alert("Lưu ý", "Mật khẩu cần ít nhất 6 ký tự.");
+      Alert.alert(t('common.notice'), t('auth.error_password_length'));
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert("Lỗi", "Mật khẩu nhập lại không khớp.");
+      Alert.alert(t('common.error'), t('auth.error_password_mismatch'));
       return;
     }
 
@@ -44,29 +46,30 @@ export default function Register({ navigation }: any) {
       const userCredential = await createUserWithEmailAndPassword(auth, cleanEmail, password);
       const user = userCredential.user;
 
+      // Lưu thông tin user vào Firestore
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         createdAt: new Date().toISOString(),
         totalPomodoro: 0,
-        displayName: "Thành viên mới",
+        displayName: t('auth.new_member'),
+        photoURL: null // Thêm sẵn để sau này làm Profile
       });
 
       setLoading(false);
       Alert.alert(
-        "Thành công", 
-        "Tài khoản đã sẵn sàng! 🍅",
-        [{ text: "Đăng nhập ngay", onPress: () => navigation.navigate("Login") }]
+        t('auth.success_title'), 
+        t('auth.success_msg'),
+        [{ text: t('auth.login_now'), onPress: () => navigation.navigate("Login") }]
       );
 
     } catch (error: any) {
       setLoading(false);
-      let errorMessage = "Đã có lỗi xảy ra.";
-      if (error.code === 'auth/email-already-in-use') errorMessage = "Email này đã được sử dụng.";
-      Alert.alert("Lỗi", errorMessage);
+      let errorMessage = t('auth.error_default');
+      if (error.code === 'auth/email-already-in-use') errorMessage = t('auth.error_email_exists');
+      Alert.alert(t('common.error'), errorMessage);
     }
   };
 
-  // Hàm render ô Input mật khẩu để code gọn hơn
   const renderPasswordInput = (
     placeholder: string, 
     value: string, 
@@ -85,6 +88,8 @@ export default function Register({ navigation }: any) {
         autoCorrect={false}
         spellCheck={false}
         autoCapitalize="none"
+        // Cải thiện bảo mật cho Android
+        importantForAutofill="no"
         keyboardType={Platform.OS === 'ios' ? 'ascii-capable' : 'default'}
         textContentType="oneTimeCode"
       />
@@ -115,8 +120,8 @@ export default function Register({ navigation }: any) {
         <Text style={styles.appName}>Pomodo</Text>
         
         <View style={styles.card}>
-          <Text style={styles.title}>Tạo tài khoản</Text>
-          <Text style={styles.subtitle}>Lưu trữ quá trình tập trung trên Cloud.</Text>
+          <Text style={styles.title}>{t('auth.register_title')}</Text>
+          <Text style={styles.subtitle}>{t('auth.register_subtitle')}</Text>
           
           <TextInput 
             placeholder="Email" 
@@ -129,9 +134,9 @@ export default function Register({ navigation }: any) {
             editable={!loading}
           />
 
-          {renderPasswordInput("Mật khẩu", password, setPassword, showPwd, () => setShowPwd(!showPwd))}
+          {renderPasswordInput(t('auth.password_placeholder'), password, setPassword, showPwd, () => setShowPwd(!showPwd))}
           
-          {renderPasswordInput("Xác nhận mật khẩu", confirmPassword, setConfirmPassword, showConfirmPwd, () => setShowConfirmPwd(!showConfirmPwd))}
+          {renderPasswordInput(t('auth.confirm_password'), confirmPassword, setConfirmPassword, showConfirmPwd, () => setShowConfirmPwd(!showConfirmPwd))}
 
           <TouchableOpacity 
             style={[styles.button, loading && { backgroundColor: '#ccc' }]} 
@@ -141,12 +146,15 @@ export default function Register({ navigation }: any) {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Đăng ký</Text>
+              <Text style={styles.buttonText}>{t('auth.register_button')}</Text>
             )}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.footerLink} disabled={loading}>
-            <Text style={styles.linkText}>Đã có tài khoản? <Text style={styles.linkHighlight}>Đăng nhập</Text></Text>
+            <Text style={styles.linkText}>
+              {t('auth.have_account')}{" "}
+              <Text style={styles.linkHighlight}>{t('auth.login_now')}</Text>
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

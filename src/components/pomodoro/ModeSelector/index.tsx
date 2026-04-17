@@ -1,96 +1,133 @@
-import React from 'react';
+import React, { memo, useEffect } from 'react';
 import { Text, TouchableOpacity, View, Dimensions } from 'react-native';
-import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated, { 
+  useAnimatedStyle, 
+  withSpring, 
+  useSharedValue, 
+  withTiming, 
+  interpolateColor,
+  interpolate
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
-
 import { useAppContext } from '@/context/AppContext'; 
 import { styles } from './styles';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CONTAINER_WIDTH = SCREEN_WIDTH * 0.9; 
+const CONTAINER_WIDTH = Math.round(SCREEN_WIDTH * 0.9); 
 const TAB_WIDTH = CONTAINER_WIDTH / 3;
 
 type ModeType = 'WORK' | 'SHORT_BREAK' | 'LONG_BREAK';
-
 const MODES_LIST: ModeType[] = ['WORK', 'SHORT_BREAK', 'LONG_BREAK'];
+const POSITIONS: Record<ModeType, number> = { WORK: 0, SHORT_BREAK: 1, LONG_BREAK: 2 };
 
 interface ModeProps {
-  mode: ModeType; 
-  changeMode: (m: ModeType) => void;
+  mode: ModeType;
+  changeMode: (newMode: ModeType) => void;
   labels?: Record<ModeType, string>;
-  accentColors?: [string, string]; 
+  accentColors?: string[];
 }
 
-export const ModeSelector = ({ mode, changeMode, labels, accentColors = ['#FF512F', '#DD2476'] } : ModeProps) => {
+const AnimatedText = Animated.createAnimatedComponent(Text);
+
+export const ModeSelector = memo(({ 
+  mode, changeMode, labels, 
+  accentColors = ['#FF512F', '#DD2476'] 
+} : ModeProps) => {
   const { t } = useTranslation();
   const { fonts, isDarkMode } = useAppContext(); 
 
-  const positions: Record<ModeType, number> = {
-    WORK: 0,
-    SHORT_BREAK: 1,
-    LONG_BREAK: 2,
-  };
+  const animIndex = useSharedValue(POSITIONS[mode]);
 
-  const indicatorStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { 
-          translateX: withSpring(positions[mode] * TAB_WIDTH, { 
-            damping: 20,
-            stiffness: 150, 
-          }) 
-        }
-      ],
-    };
-  });
+  useEffect(() => {
+    animIndex.value = withSpring(POSITIONS[mode], {
+      damping: 20,
+      stiffness: 150,
+      mass: 0.8,
+    });
+  }, [mode]);
 
+  const indicatorStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: animIndex.value * TAB_WIDTH }],
+  }));
 
   return (
     <View style={[styles.modeRow, { width: CONTAINER_WIDTH, overflow: 'hidden' }]}>
+      {/* Indicator Layer */}
       <Animated.View style={[
         styles.activeIndicator, 
         indicatorStyle,
-        { width: TAB_WIDTH - 8, marginHorizontal: 4, position: 'absolute', zIndex: 0 } 
+        { 
+          width: TAB_WIDTH - 8, 
+          marginHorizontal: 4, 
+          position: 'absolute', 
+          zIndex: 0,
+          height: '80%',
+          top: '10%'
+        } 
       ]}>
         <LinearGradient
-          colors={accentColors}
+          colors={accentColors as [string, string]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={{ flex: 1, borderRadius: 12 }}
         />
       </Animated.View>
 
-      {MODES_LIST?.map((m) => {
-        const isActive = mode === m;
+      {MODES_LIST.map((m) => {
+        const index = POSITIONS[m];
+        
+        const animatedTextStyle = useAnimatedStyle(() => {
+          // Màu chữ chuyển đổi mượt mà theo vị trí indicator
+          const color = interpolateColor(
+            animIndex.value,
+            [index - 0.5, index, index + 0.5],
+            [isDarkMode ? '#888' : '#AAA', '#FFFFFF', isDarkMode ? '#888' : '#AAA']
+          );
+
+          // Scale chữ dựa trên khoảng cách của indicator tới tab đó (Mượt hơn dùng biến mode)
+          const scale = interpolate(
+            animIndex.value,
+            [index - 1, index, index + 1],
+            [1, 1.1, 1]
+          );
+
+          return {
+            color: color,
+            transform: [{ scale: scale }]
+          };
+        });
+
         return (
           <TouchableOpacity 
             key={m} 
-            style={[styles.modeButton, { flex: 1, zIndex: 1 }]}
-            activeOpacity={0.8}
+            style={{ flex: 1, zIndex: 1, alignItems: 'center', justifyContent: 'center', height: 45 }}
+            activeOpacity={1}
             onPress={() => {
               if (mode !== m) {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                requestAnimationFrame(() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                });
                 changeMode(m);
               }
             }}
           >
-            <Text 
+            <AnimatedText 
               style={[
                 styles.modeText, 
+                animatedTextStyle,
                 { 
                   fontFamily: fonts?.rounded || 'System',
-                  color: isActive ? '#FFF' : (isDarkMode ? '#666' : '#999'),
-                  fontWeight: isActive ? '700' : '500'
+                  fontWeight: '600',
                 }
-              ]}
-            >
+              ]
+            }>
               {labels?.[m] || t(`pomodoro.modes.${m.toLowerCase()}`)}
-            </Text>
+            </AnimatedText>
           </TouchableOpacity>
         );
       })}
     </View>
   );
-};
+});

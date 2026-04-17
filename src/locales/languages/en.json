@@ -1,4 +1,41 @@
 {
+  "tabs": {
+    "tasks": "Tasks",
+    "rooms": "Rooms",
+    "focus": "Focus",
+    "stats": "Results",
+    "settings": "Settings"
+  },
+
+  "auth": {
+    "login_title": "Welcome Back",
+    "login_subtitle": "Please log in to continue your work sessions.",
+    "email_placeholder": "Your Email",
+    "password_placeholder": "Password",
+    "login_button": "Login",
+    "no_account": "Don't have an account?",
+    "register_now": "Register now",
+    "empty_alert": "Please enter both Email and Password!",
+    "fail_title": "Login Failed",
+    "error_invalid": "Incorrect email or password. Please check again!",
+    "error_too_many": "Too many attempts. Please wait a moment!",
+    "error_default": "An error occurred. Please try again later!",
+
+    "register_title": "Create Account",
+    "register_subtitle": "Save your focus progress on the Cloud.",
+    "confirm_password": "Confirm Password",
+    "register_button": "Register",
+    "have_account": "Already have an account?",
+    "login_now": "Login",
+    "success_title": "Success",
+    "success_msg": "Your account is ready! 🍅",
+    "error_email_format": "Please enter a valid email format.",
+    "error_password_length": "Password must be at least 6 characters.",
+    "error_password_mismatch": "Passwords do not match.",
+    "error_email_exists": "This email is already in use.",
+    "new_member": "New Member"
+  },
+  
   "layout": {
     "tasks": "Tasks",
     "stats": "Statistics",
@@ -15,35 +52,35 @@
       "long_break": "Long Break"
     },
     "sessions": "Sessions: {{count}}",
-    "more_to_long": "{{count}} sessions until long break",
+    "more_to_long": "{{count}} more sessions until long break",
     "working_on": "🚀 Working on: {{task}}",
-    "finish_task": "Finish Task",
-    "congrats": "Excellent! You've reached your goal. 🎉",
-    "work_done": "Focus session complete! 🎉",
-    "work_body": "It's time for a little break.",
-    "break_done": "Break is over!",
-    "break_body": "Let's start a new focus session.",
-    "finish_title": "Task Completed!",
+    "finish_task": "Finish this task",
+    "congrats": "Great! You have completed your goal. 🎉",
+    "work_done": "Focus session completed! 🎉",
+    "work_body": "It's time for a short rest.",
+    "break_done": "Break time over!",
+    "break_body": "Let's start a new work session.",
+    "finish_title": "Work Completed!",
     "finish_body": "You have completed this task excellently."
   },
 
   "tasks": {
     "header": "Daily Tasks",
-    "placeholder": "What's on your mind?...",
+    "placeholder": "Add a task note...",
     "empty_title": "No tasks yet",
     "empty_subtitle": "Add a task to start your day!",
     "focus": "Focus",
     "permission_denied": "Notification permission denied",
     "notif_title": "⏰ Time's up!",
-    "notif_body": "Task: {{task}}",
+    "notif_body": "Current task: {{task}}",
     "toast_added": "🚀 Task added!",
-    "toast_completed": "✅ Great job! Done.",
+    "toast_completed": "✅ Great! Done.",
     "toast_restored": "⏳ Reminder restored",
     "toast_uncheck": "↩️ Task unchecked",
     "toast_deleted": "🗑️ Task deleted",
-    "delete_focus_title": "Active Task! 🎯",
+    "delete_focus_title": "Task in progress! 🎯",
     "delete_focus_msg": "You are focusing on this task. Deleting it will stop the current session. Are you sure?",
-    "login_required": "Please login to use this feature!",
+    "login_required": "Please log in to use this feature!",
     "selected_for_focus": "🚀 Task selected for focus!",
     "delete_all_confirm": "Are you sure you want to delete all tasks from the cloud?"
   },
@@ -52,20 +89,63 @@
     "header": "Statistics 📊",
     "productivity_chart": "Productivity Chart",
     "task_details": "Task Details",
-    "reset_button": "Reset",
+    "reset_button": "Refresh",
     "alert_title": "Confirm Delete 🗑️",
-    "alert_msg": "Are you sure you want to delete all task history?"
+    "alert_msg": "Are you sure you want to clear all work history?",
+    "no_data": "No chart data available"
   },
 
   "stat_cards": {
-    "total_pomodoros": "Total Pomodoros",
+    "total_pomodoros": "Total Pomos",
     "completed": "Completed",
     "pending": "Pending: ",
     "tasks_unit": " tasks"
   },
 
   "task_details": {
-    "task_empty": "Haven't worked on anything today? Let's get started!"
+    "task_empty": "Haven't you worked on anything today? Start now!"
+  },
+
+  "leaderboard": {
+    "title": "Leaderboard 🏆",
+    "subtitle": "Most focused warriors",
+    "today": "Today",
+    "weekly": "Weekly",
+    "month": "Monthly",
+    "sessions_unit": "sessions",
+    "empty": "No data available for this section 😅"
+  },
+
+  "rooms": {
+    "input_placeholder": "Enter invite code...",
+    "join_btn": "JOIN",
+    "empty": "No rooms yet, create a new one!",
+    "join_error": "Invalid room code or room is full",
+    "delete_btn": "Delete room",
+    "delete_confirm_title": "Delete Room",
+    "delete_confirm_msg": "Confirm deleting this room?"
+  },
+
+  "create_room": {
+    "title": "Create New Room",
+    "name_label": "Room Name",
+    "name_placeholder": "Ex: EPU IT Study Group",
+    "topic_label": "Topic (Optional)",
+    "topic_placeholder": "Ex: React Native / Java",
+    "submit_btn": "Create & Start",
+    "name_required": "Please enter a room name",
+    "create_failed": "Error occurred while creating room"
+  },
+  "room_detail": {
+    "room_code": "Room Code",
+    "start_focus": "Start Focus",
+    "online_members": "Online members",
+    "chat_placeholder": "Type a message...",
+    "send_btn": "Send",
+    "send_error": "Cannot send message",
+    "leave_title": "Leave Room",
+    "leave_msg": "Are you sure you want to leave this room?",
+    "leave_action": "Leave room"
   },
 
   "settings": {
@@ -76,9 +156,9 @@
       "system": "SYSTEM",
       "profile": "ACCOUNT"
     },
-    "work_time": "Work Duration",
+    "work_time": "Focus duration",
     "minutes": "mins",
-    "helper_text": "Time changes will apply to the next session.",
+    "helper_text": "Time will apply to new sessions.",
     "dark_mode": "Dark Mode",
     "light_mode": "Light Mode",
     "language": "Language",
@@ -89,24 +169,50 @@
     "reset_button": "Reset",
     "version": "Version 1.0.0 • Made with ❤️ by DTT",
     "logout_title": "Logout",
-    "logout_confirm": "Are you sure you want to logout?",
+    "logout_confirm": "Are you sure you want to log out?",
     "edit_profile": "Edit Profile",
     "view_profile": "View Profile Details"
   },
 
   "profile": {
     "header": "Profile",
-    "plan_pro": "Pro Member",
-    "edit": "Edit",
-    "upgrade": "Upgrade",
-    "achievements": "Achievements",
     "monthly_stats": "Monthly Stats",
-    "view_all": "View All",
     "stats": {
-      "minutes": "Minutes",
+      "minutes": "Mins",
       "sessions": "Sessions",
-      "streak": "Day Streak"
+      "streak": "Streak"
+    },
+    "plan_pro": "Pro Member",
+    "plan_free": "Free Member",
+    "edit": "Edit",
+    "personal_info": "Personal Info",
+    "email": "Email",
+    "birthday": "Birthday",
+    "gender": "Gender",
+    "job": "Occupation",
+    "levels": {
+      "beginner": "Focus Seedling 🌱",
+      "warrior": "Pomodoro Warrior 🔥",
+      "master": "Time Master 👑"
     }
+  },
+  "edit_profile": {
+    "title": "Edit Profile",
+    "change_avatar": "Tap to change avatar",
+    "full_name": "Full Name",
+    "name_placeholder": "Enter your name",
+    "birthday": "Birthday",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "job": "Occupation",
+    "job_placeholder": "Ex: Student, Developer...",
+    "save_button": "Save all changes",
+    "error_name": "Name cannot be empty",
+    "error_date": "Please enter birthday format DD/MM/YYYY (Ex: 20/10/2004)",
+    "success": "Profile updated!",
+    "fail": "Update failed."
   },
 
   "common": {
@@ -115,6 +221,8 @@
     "delete": "Delete",
     "notice": "Notice",
     "error": "Error",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "stay": "Stay",
+    "leave": "Leave"
   }
 }

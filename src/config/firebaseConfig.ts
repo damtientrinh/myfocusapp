@@ -1,11 +1,9 @@
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { getAuth, getReactNativePersistence, initializeAuth } from 'firebase/auth';
-import {
-  getFirestore,
-  initializeFirestore,
-  persistentLocalCache
-} from "firebase/firestore";
+// @ts-ignore
+import { getAuth, initializeAuth, getReactNativePersistence, Auth } from 'firebase/auth';
+import { getFirestore } from "firebase/firestore";
+
 
 // Sử dụng biến môi trường để bảo mật API Key
 const firebaseConfig = {
@@ -21,26 +19,17 @@ const firebaseConfig = {
 // 1. Khởi tạo Firebase App an toàn
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// 2. Khởi tạo Auth an toàn
-let firebaseAuth;
+// 2. Khởi tạo Auth chuẩn cho React Native (Tránh lỗi initialized)
+let authInstance: Auth;
+
 try {
-  firebaseAuth = getAuth(app);
+  authInstance = getAuth(app);
 } catch (e) {
-  firebaseAuth = initializeAuth(app, {
-    persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+  authInstance = initializeAuth(app, {
+    persistence: getReactNativePersistence(ReactNativeAsyncStorage),
   });
 }
 
-// 3. Khởi tạo Firestore an toàn cho Mobile
-let firestoreDb;
-try {
-  firestoreDb = initializeFirestore(app, {
-    localCache: persistentLocalCache({}) 
-  });
-} catch (e) {
-  firestoreDb = getFirestore(app);
-}
-
-export const db = firestoreDb;
-export const auth = firebaseAuth;
+export const auth = authInstance;
+export const db = getFirestore(app);
 export default app;

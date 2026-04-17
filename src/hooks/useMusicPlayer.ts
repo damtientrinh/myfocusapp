@@ -1,11 +1,11 @@
-import { 
-  useAudioPlayer, 
-  useAudioPlayerStatus, 
-  setAudioModeAsync, 
-  AudioSource
+import {
+  AudioSource,
+  setAudioModeAsync,
+  useAudioPlayer,
+  useAudioPlayerStatus
 } from 'expo-audio';
 import { useEffect, useState } from 'react';
-import { STUDY_PLAYLIST } from '../constants/assets';
+import { STUDY_PLAYLIST } from '../constants/music';
 
 export const useMusicPlayer = (isActive: boolean) => {
   const [currentIndex, setCurrentIndex] = useState(0);

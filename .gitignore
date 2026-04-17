@@ -41,8 +41,13 @@ app-example
 # generated native folders
 /ios
 /android
-. v s /  
+. v s / 
+ 
  . v s / 
-# Firebase Secret Keys
+
+.vs/
+.vscode/
+
+# Firebase Secret Keys
 .env
  

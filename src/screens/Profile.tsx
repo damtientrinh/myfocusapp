@@ -1,18 +1,18 @@
-﻿import React from "react";
-import { 
-  View, 
-  Text, 
-  Image, 
-  ScrollView, 
-  TouchableOpacity, 
-  StatusBar 
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from 'expo-linear-gradient'; 
+﻿import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from 'expo-linear-gradient';
+import React from "react";
 import { useTranslation } from "react-i18next";
+import {
+  Image,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 import { useAppContext } from "../context/AppContext";
 import { styles } from "../styles/ProfileStyles";
-import { useNavigation } from "@react-navigation/native";
 
 export default function ProfileScreen() {
   const { user, theme } = useAppContext();
@@ -27,10 +27,19 @@ export default function ProfileScreen() {
       </View>
       <View>
         <Text style={{ fontSize: 12, color: theme.text, opacity: 0.6 }}>{label}</Text>
-        <Text style={{ fontSize: 15, color: theme.text, fontWeight: '600' }}>{value || "---"}</Text>
+        {/* ✅ Fix: Bọc giá trị trong Template String để tránh lỗi dữ liệu null/undefined */}
+        <Text style={{ fontSize: 15, color: theme.text, fontWeight: '600' }}>
+          {`${value || "---"}`}
+        </Text>
       </View>
     </View>
   );
+
+  const getLevel = (minutes: number = 0) => {
+    if (minutes < 100) return t('profile.levels.beginner');
+    if (minutes < 500) return t('profile.levels.warrior');
+    return t('profile.levels.master');
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -47,7 +56,6 @@ export default function ProfileScreen() {
           </View>
         </LinearGradient>
 
-     
         {/* PROFILE CARD */}
         <View style={[styles.profileCard, { backgroundColor: theme.card || '#fff'}]}>
           <View style={styles.avatarContainer}>
@@ -63,16 +71,21 @@ export default function ProfileScreen() {
           </View>
 
           <Text style={[styles.name, { color: theme.text }]}>
-            {user?.displayName || "Đàm Tiến Trình"}
+            {`${user?.displayName || t('auth.new_member')}`}
           </Text>
+          
+          {/* ✅ Hiển thị Level (Nếu Trình muốn mở lại) */}
+          <Text style={{ color: '#e74c3c', fontWeight: '700', fontSize: 13, marginTop: 2 }}>
+            {getLevel(user?.totalMinutes)}
+          </Text>
+
           <Text style={styles.plan}>
-            {user?.isPro ? t('profile.plan_pro') : "Free Member"}
+            {user?.isPro ? t('profile.plan_pro') : t('profile.plan_free')}
           </Text>
 
           <View style={styles.buttonRow}>
             <TouchableOpacity 
               style={styles.editButton} 
-              activeOpacity={0.7}
               onPress={() => navigation.navigate('EditProfile')} 
             >
               <Ionicons name="create-outline" size={16} color="#fff" />
@@ -81,15 +94,18 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* THÔNG TIN CHI TIẾT (MỚI THÊM) */}
+        {/* THÔNG TIN CHI TIẾT */}
         <View style={[styles.card, { backgroundColor: theme.card, marginTop: 15 }]}>
           <View style={styles.cardHeader}>
-            <Text style={[styles.cardTitle, { color: theme.text }]}>Thông tin cá nhân</Text>
+            <Text style={[styles.cardTitle, { color: theme.text }]}>
+              {t('profile.personal_info')}
+            </Text>
           </View>
           <View style={{ paddingVertical: 10 }}>
-            {renderInfoItem("calendar-outline", "Ngày sinh", (user as any)?.birthday)}
-            {renderInfoItem("male-female-outline", "Giới tính", (user as any)?.gender)}
-            {renderInfoItem("briefcase-outline", "Nghề nghiệp", (user as any)?.job)}
+            {renderInfoItem("mail-outline", t('profile.email'), user?.email)}
+            {renderInfoItem("calendar-outline", t('profile.birthday'), (user as any)?.birthday)}
+            {renderInfoItem("male-female-outline", t('profile.gender'), (user as any)?.gender)}
+            {renderInfoItem("briefcase-outline", t('profile.job'), (user as any)?.job)}
           </View>
         </View>
 
@@ -103,21 +119,21 @@ export default function ProfileScreen() {
             <View style={styles.statBox}>
               <Ionicons name="time-outline" size={20} color="#e74c3c" />
               <Text style={[styles.statsNumber, { color: theme.text }]}>
-                {user?.totalMinutes?.toLocaleString() || 0}
+                {user?.totalMinutes || 0}
               </Text>
               <Text style={styles.statsLabel}>{t('profile.stats.minutes')}</Text>
             </View>
 
             <View style={styles.statBox}>
-              <Ionicons name="checkmark-done-outline" size={20} color="#e74c3c" />
+              <Ionicons name="trophy-outline" size={20} color="#f1c40f" /> 
               <Text style={[styles.statsNumber, { color: theme.text }]}>
-                {user?.totalSessions || 0}
+                {user?.completedSessions || 0} 
               </Text>
               <Text style={styles.statsLabel}>{t('profile.stats.sessions')}</Text>
             </View>
             
             <View style={styles.statBox}>
-              <Ionicons name="flame-outline" size={20} color="#e74c3c" />
+              <Ionicons name="flame-outline" size={20} color="#e67e22" />
               <Text style={[styles.statsNumber, { color: theme.text }]}>
                 {user?.currentStreak || 0}
               </Text>

@@ -19,9 +19,9 @@ export const MusicControl = ({ isMuted, setIsMuted, nextTrack, title, isDarkMode
   const formatTitle = (rawTitle: string) => {
     if (!rawTitle) return "No Track";
     return rawTitle
-      .replace(/-/g, ' ')           // Thay gạch ngang bằng khoảng trắng
-      .replace(/\.mp3/g, '')        // Xóa đuôi .mp3
-      .replace(/\d+/g, '')          // Xóa các con số linh tinh
+      .replace(/-/g, ' ')          
+      .replace(/\.mp3/g, '')        
+      .replace(/\d+/g, '')          
       .trim();
   };
 

@@ -1,24 +1,27 @@
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Alert, 
-  Image, 
-  ActivityIndicator, 
-  ScrollView 
-} from 'react-native';
-import { useAppContext } from '../context/AppContext';
 import { db } from '@/config/firebaseConfig';
-import { doc, updateDoc } from 'firebase/firestore';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import { Ionicons } from '@expo/vector-icons';
+import { doc, updateDoc } from 'firebase/firestore';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  ActivityIndicator,
+  Alert, Image,
+  Keyboard // Thêm Keyboard
+  ,
+
+  ScrollView,
+  Text, TextInput, TouchableOpacity,
+  View
+} from 'react-native';
+import { useAppContext } from '../context/AppContext';
+import { styles } from '../styles/EditProfileStyles';
+
 
 export default function EditProfileScreen() {
   const { user, theme, isDarkMode } = useAppContext();
+  const { t } = useTranslation(); // 2. Khai báo hook
   const navigation = useNavigation();
   
   const [name, setName] = useState(user?.displayName || "");
@@ -29,12 +32,14 @@ export default function EditProfileScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleSave = async () => {
-    if (!name.trim()) return Alert.alert("Lỗi", "Tên không được để trống");
+    Keyboard.dismiss(); // ✅ Cải thiện: Tự đóng bàn phím khi bấm Lưu
+    
+    if (!name.trim()) return Alert.alert(t('common.error'), t('edit_profile.error_name'));
     if (!user?.uid) return;
 
     const dateRegex = /^(0?[1-9]|[12][0-9]|3[01])[\/](0?[1-9]|1[012])[\/]\d{4}$/;
     if (birthday && !dateRegex.test(birthday)) {
-        return Alert.alert("Lỗi định dạng", "Vui lòng nhập ngày sinh theo định dạng Ngày/Tháng/Năm (VD: 20/10/2004)");
+      return Alert.alert(t('common.error'), t('edit_profile.error_date'));
     }
 
     setLoading(true);
@@ -47,10 +52,10 @@ export default function EditProfileScreen() {
         gender: gender,
         job: job
       });
-      Alert.alert("Thành công", "Đã cập nhật hồ sơ!");
+      Alert.alert(t('common.success'), t('edit_profile.success'));
       navigation.goBack();
     } catch (error) {
-      Alert.alert("Lỗi", "Cập nhật thất bại.");
+      Alert.alert(t('common.error'), t('edit_profile.fail'));
     } finally {
       setLoading(false);
     }
@@ -79,11 +84,18 @@ export default function EditProfileScreen() {
   return (
     <ScrollView 
       style={[styles.container, { backgroundColor: theme.background }]}
-      contentContainerStyle={{ paddingTop: 30, paddingBottom: 60 }} // KHẮC PHỤC LỖI CHE ẢNH
+      contentContainerStyle={{ paddingTop: 30, paddingBottom: 60 }}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled" 
     >
       <View style={styles.avatarSection}>
         <TouchableOpacity onPress={async () => {
+          const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (status !== 'granted') {
+            Alert.alert("Quyền truy cập", "App cần quyền truy cập ảnh để đổi avatar nhé!");
+            return;
+          }
+
           let result = await ImagePicker.launchImageLibraryAsync({ 
             allowsEditing: true, 
             aspect: [1, 1],
@@ -97,39 +109,43 @@ export default function EditProfileScreen() {
           </View>
         </TouchableOpacity>
         <Text style={[styles.subText, { color: theme.text, opacity: 0.6 }]}>
-          Chạm để đổi ảnh đại diện
+          {t('edit_profile.change_avatar')}
         </Text>
       </View>
 
-      {renderInput("Họ và tên", name, setName, "Nhập tên của bạn")}
-      {renderInput("Ngày sinh", birthday, setBirthday, "DD/MM/YYYY")}
+      {renderInput(t('edit_profile.full_name'), name, setName, t('edit_profile.name_placeholder'))}
+      {renderInput(t('edit_profile.birthday'), birthday, setBirthday, "DD/MM/YYYY")}
 
       <View style={styles.inputGroup}>
-        <Text style={[styles.label, { color: theme.text }]}>Giới tính</Text>
+        <Text style={[styles.label, { color: theme.text }]}>{t('edit_profile.gender')}</Text>
         <View style={styles.genderRow}>
-          {['Nam', 'Nữ', 'Khác'].map((item) => (
+          {[
+            { id: 'Nam', key: 'male' },
+            { id: 'Nữ', key: 'female' },
+            { id: 'Khác', key: 'other' }
+          ].map((item) => (
             <TouchableOpacity 
-              key={item}
+              key={item.id}
               style={[
                   styles.genderBtn, 
                   { backgroundColor: isDarkMode ? "#333" : "#f5f5f5" },
-                  gender === item && { backgroundColor: '#e74c3c' }
+                  gender === item.id && { backgroundColor: '#e74c3c' }
               ]}
-              onPress={() => setGender(item)}
+              onPress={() => setGender(item.id)}
             >
               <Text style={[
                   styles.genderText,
                   { color: theme.text },
-                  gender === item && { color: '#fff' }
+                  gender === item.id && { color: '#fff' }
               ]}>
-                  {item}
+                  {t(`edit_profile.${item.key}`)} 
               </Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
 
-      {renderInput("Nghề nghiệp", job, setJob, "VD: Sinh viên EPU, Developer...")}
+      {renderInput(t('edit_profile.job'), job, setJob, t('edit_profile.job_placeholder'))}
 
       <TouchableOpacity 
         style={[styles.saveButton, { opacity: loading ? 0.7 : 1 }]} 
@@ -139,61 +155,9 @@ export default function EditProfileScreen() {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.saveText}>Lưu tất cả thay đổi</Text>
+          <Text style={styles.saveText}>{t('edit_profile.save_button')}</Text>
         )}
       </TouchableOpacity>
     </ScrollView>
   );
 }
-
-
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 20 },
-  avatarSection: { alignItems: 'center', marginTop: 30, marginBottom: 20 },
-  avatar: { width: 110, height: 110, borderRadius: 55, borderWidth: 3, borderColor: '#e74c3c' },
-  cameraIcon: { 
-    position: 'absolute', 
-    bottom: 5, 
-    right: 5, 
-    backgroundColor: '#e74c3c', 
-    padding: 8, 
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: '#fff'
-  },
-  subText: { fontSize: 12, marginTop: 10, fontWeight: '500' },
-  inputGroup: { marginBottom: 18 },
-  label: { fontSize: 14, fontWeight: 'bold', marginBottom: 8 },
-  input: { 
-    height: 52, 
-    borderRadius: 12, 
-    paddingHorizontal: 15, 
-    borderWidth: 1,
-    fontSize: 16 
-  },
-  genderRow: { flexDirection: 'row', gap: 10 },
-  genderBtn: { 
-    flex: 1, 
-    height: 48, 
-    borderRadius: 12, 
-    justifyContent: 'center', 
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'transparent' 
-  },
-  genderText: { fontWeight: '600', fontSize: 15 },
-  saveButton: { 
-    backgroundColor: '#e74c3c', 
-    height: 56, 
-    borderRadius: 16, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    marginTop: 15,
-    shadowColor: "#e74c3c",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 6
-  },
-  saveText: { color: '#fff', fontSize: 17, fontWeight: 'bold' }
-});

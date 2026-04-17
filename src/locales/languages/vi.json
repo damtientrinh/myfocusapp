@@ -1,4 +1,41 @@
 {
+  "tabs": {
+    "tasks": "Nhiệm vụ",
+    "rooms": "Phòng học",
+    "focus": "Tập trung",
+    "stats": "Thành tích",
+    "settings": "Cài đặt"
+  },
+
+  "auth": {
+    "login_title": "Chào mừng trở lại",
+    "login_subtitle": "Hãy đăng nhập để tiếp tục các phiên làm việc còn dang dở.",
+    "email_placeholder": "Email của bạn",
+    "password_placeholder": "Mật khẩu",
+    "login_button": "Đăng nhập",
+    "no_account": "Chưa có tài khoản?",
+    "register_now": "Đăng ký ngay",
+    "empty_alert": "Bạn vui lòng điền đầy đủ Email và Mật khẩu nhé!",
+    "fail_title": "Đăng nhập thất bại",
+    "error_invalid": "Email hoặc mật khẩu không chính xác. Bạn kiểm tra lại nha!",
+    "error_too_many": "Thử lại quá nhiều lần. Bạn hãy đợi một lát nhé!",
+    "error_default": "Đã có lỗi xảy ra. Bạn vui lòng thử lại sau nhé!",
+
+    "register_title": "Tạo tài khoản",
+    "register_subtitle": "Lưu trữ quá trình tập trung trên Cloud.",
+    "confirm_password": "Xác nhận mật khẩu",
+    "register_button": "Đăng ký",
+    "have_account": "Đã có tài khoản?",
+    "login_now": "Đăng nhập",
+    "success_title": "Thành công",
+    "success_msg": "Tài khoản đã sẵn sàng! 🍅",
+    "error_email_format": "Vui lòng nhập đúng định dạng email nhé.",
+    "error_password_length": "Mật khẩu cần ít nhất 6 ký tự.",
+    "error_password_mismatch": "Mật khẩu nhập lại không khớp.",
+    "error_email_exists": "Email này đã được sử dụng.",
+    "new_member": "Thành viên mới"
+  },
+  
   "layout": {
     "tasks": "Công việc",
     "stats": "Thống kê",
@@ -54,7 +91,8 @@
     "task_details": "Chi tiết công việc",
     "reset_button": "Làm mới",
     "alert_title": "Xác nhận xóa 🗑️",
-    "alert_msg": "Bạn có chắc muốn xóa toàn bộ lịch sử công việc?"
+    "alert_msg": "Bạn có chắc muốn xóa toàn bộ lịch sử công việc?",
+    "no_data": "Chưa có dữ liệu biểu đồ"
   },
 
   "stat_cards": {
@@ -67,6 +105,49 @@
   "task_details": {
     "task_empty": "Hôm nay bạn chưa làm việc gì sao? Hãy bắt đầu ngay nhé!"
   },
+
+  "leaderboard": {
+    "title": "Bảng Xếp Hạng 🏆",
+    "subtitle": "Những chiến binh tập trung nhất",
+    "today": "Hôm nay",
+    "weekly": "Tuần này",
+    "month": "Tháng này",
+    "sessions_unit": "phiên",
+    "empty": "Chưa có dữ liệu cho mục này 😅"
+  },
+
+  "rooms": {
+    "input_placeholder": "Nhập mã mời vào phòng...",
+    "join_btn": "VÀO",
+    "empty": "Chưa có phòng nào, hãy tạo phòng mới!",
+    "join_error": "Mã phòng không chính xác hoặc phòng đã đầy",
+    "delete_btn": "Xóa phòng",
+    "delete_confirm_title": "Xóa phòng",
+    "delete_confirm_msg": "Xác nhận xóa phòng này?"
+  },
+
+  "create_room": {
+    "title": "Tạo phòng mới",
+    "name_label": "Tên phòng",
+    "name_placeholder": "VD: Học nhóm IT EPU",
+    "topic_label": "Chủ đề (Tùy chọn)",
+    "topic_placeholder": "VD: React Native / Java",
+    "submit_btn": "Tạo phòng & Bắt đầu",
+    "name_required": "Vui lòng nhập tên phòng",
+    "create_failed": "Có lỗi xảy ra khi tạo phòng"
+  },
+  "room_detail": {
+    "room_code": "Mã phòng",
+    "start_focus": "Bắt đầu Focus",
+    "online_members": "Đang online",
+    "chat_placeholder": "Nhập tin nhắn...",
+    "send_btn": "Gửi",
+    "send_error": "Không thể gửi tin nhắn",
+    "leave_title": "Rời phòng",
+    "leave_msg": "Bạn có chắc chắn muốn rời khỏi phòng này?",
+    "leave_action": "Rời khỏi phòng"
+  },
+
 
   "settings": {
     "header": "Cài đặt",
@@ -96,17 +177,43 @@
 
   "profile": {
     "header": "Hồ sơ",
-    "plan_pro": "Thành viên Pro",
-    "edit": "Chỉnh sửa",
-    "upgrade": "Nâng cấp",
-    "achievements": "Thành tích",
-    "monthly_stats": "Thống kê tháng",
-    "view_all": "Xem tất cả",
+    "monthly_stats": "Thống kê tháng này",
     "stats": {
       "minutes": "Phút",
       "sessions": "Phiên",
-      "streak": "Ngày streak"
+      "streak": "Chuỗi"
+    },
+    "plan_pro": "Thành viên Pro",
+    "plan_free": "Thành viên miễn phí",
+    "edit": "Chỉnh sửa",
+    "personal_info": "Thông tin cá nhân",
+    "email": "Email",
+    "birthday": "Ngày sinh",
+    "gender": "Giới tính",
+    "job": "Nghề nghiệp",
+    "levels": {
+      "beginner": "Mầm non Tập trung 🌱",
+      "warrior": "Chiến binh Pomodoro 🔥",
+      "master": "Bậc thầy Thời gian 👑"
     }
+  },
+  "edit_profile": {
+    "title": "Chỉnh sửa hồ sơ",
+    "change_avatar": "Chạm để đổi ảnh đại diện",
+    "full_name": "Họ và tên",
+    "name_placeholder": "Nhập tên của bạn",
+    "birthday": "Ngày sinh",
+    "gender": "Giới tính",
+    "male": "Nam",
+    "female": "Nữ",
+    "other": "Khác",
+    "job": "Nghề nghiệp",
+    "job_placeholder": "VD: Sinh viên, Developer...",
+    "save_button": "Lưu tất cả thay đổi",
+    "error_name": "Tên không được để trống",
+    "error_date": "Vui lòng nhập ngày sinh theo định dạng Ngày/Tháng/Năm (VD: 20/10/2004)",
+    "success": "Đã cập nhật hồ sơ!",
+    "fail": "Cập nhật thất bại."
   },
 
   "common": {
@@ -115,6 +222,8 @@
     "delete": "Xóa",
     "notice": "Thông báo",
     "error": "Lỗi",
-    "loading": "Đang tải..."
+    "loading": "Đang tải...",
+    "stay": "Ở lại",
+    "leave": "Rời đi"
   }
 }

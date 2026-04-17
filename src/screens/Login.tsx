@@ -1,11 +1,12 @@
-﻿import React, { useState } from "react";
+﻿import React, { useState, useRef } from "react"; // Thêm useRef
 import { 
   ActivityIndicator, Alert, Text, TextInput, 
   TouchableOpacity, View, KeyboardAvoidingView, 
   Platform, ScrollView 
 } from "react-native";
 import { authStyles as styles } from "../styles/authStyles";
-import { Ionicons } from '@expo/vector-icons'; // Sử dụng thư viện icon có sẵn
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from "react-i18next"; // Import đa ngôn ngữ
 
 // Firebase
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -17,17 +18,20 @@ interface LoginProps {
 }
 
 export default function Login({ navigation, setUser }: LoginProps) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // Trạng thái ẩn/hiện mật khẩu
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Cải thiện: Ref để chuyển focus mượt mà
+  const passwordRef = useRef<TextInput>(null);
 
   const handleLogin = async () => {
-    // Xử lý email: xóa khoảng trắng dư thừa
     const cleanEmail = email.trim();
 
     if (!cleanEmail || !password) {
-      Alert.alert("Thông báo", "Bạn vui lòng điền đầy đủ Email và Mật khẩu nhé!");
+      Alert.alert(t('common.notice'), t('auth.empty_alert'));
       return;
     }
 
@@ -35,22 +39,17 @@ export default function Login({ navigation, setUser }: LoginProps) {
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
-      const user = userCredential.user;
-
-      if (setUser) {
-        setUser(user);
-      }
-      
+      if (setUser) setUser(userCredential.user);
     } catch (error: any) {
-      let errorMessage = "Đã có lỗi xảy ra. Bạn vui lòng thử lại sau nhé!";
+      let errorMessage = t('auth.error_default');
       
       if (error.code === 'auth/invalid-credential') {
-        errorMessage = "Email hoặc mật khẩu không chính xác. Bạn kiểm tra lại nha!";
+        errorMessage = t('auth.error_invalid');
       } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = "Thử lại quá nhiều lần. Bạn hãy đợi một lát nhé!";
+        errorMessage = t('auth.error_too_many');
       }
 
-      Alert.alert("Đăng nhập thất bại", errorMessage);
+      Alert.alert(t('auth.fail_title'), errorMessage);
     } finally {
       setLoading(false);
     }
@@ -70,51 +69,45 @@ export default function Login({ navigation, setUser }: LoginProps) {
           <Text style={styles.appName}>Pomodo</Text>
           
           <View style={styles.card}>
-            <Text style={styles.title}>Chào mừng trở lại</Text>
-            <Text style={styles.subtitle}>Hãy đăng nhập để tiếp tục các phiên làm việc còn dang dở.</Text>
+            <Text style={styles.title}>{t('auth.login_title')}</Text>
+            <Text style={styles.subtitle}>{t('auth.login_subtitle')}</Text>
 
             {/* Input Email */}
             <TextInput
-              placeholder="Email của bạn"
+              placeholder={t('auth.email_placeholder')}
               style={styles.input}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
               editable={!loading}
+              returnKeyType="next" // Cải thiện: Hiển thị nút "Tiếp"
+              onSubmitEditing={() => passwordRef.current?.focus()} // Cải thiện: Tự nhảy xuống ô pass
+              blurOnSubmit={false}
             />
 
-            {/* Input Mật khẩu với chức năng ẩn/hiện */}
+            {/* Input Mật khẩu */}
             <View style={{ position: 'relative' }}>
               <TextInput
-                placeholder="Mật khẩu"
+                ref={passwordRef} // Gắn ref ở đây
+                placeholder={t('auth.password_placeholder')}
                 style={[styles.input, { paddingRight: 50 }]}
                 secureTextEntry={!showPassword}
                 value={password}
                 onChangeText={setPassword}
                 editable={!loading}
-
-                // Cấu hình CỰC MẠNH để ép ẩn:
                 autoCorrect={false}
                 spellCheck={false}
                 autoCapitalize="none"
-                
-                // Dòng này cực kỳ quan trọng trên Android để tránh lộ mật khẩu:
                 importantForAutofill="no" 
-                
-                // Ép máy hiểu đây là dữ liệu thô, không cho bộ gõ Tiếng Việt can thiệp soạn thảo:
                 keyboardType={Platform.OS === 'ios' ? 'ascii-capable' : 'default'}
-                
-                // Cố định kiểu dữ liệu là mật khẩu ở mức hệ thống
                 textContentType="oneTimeCode" 
+                returnKeyType="done" // Cải thiện: Hiển thị nút "Xong"
+                onSubmitEditing={handleLogin} // Cải thiện: Nhấn Enter là đăng nhập luôn
               />
 
               <TouchableOpacity 
-                style={{ 
-                  position: 'absolute', 
-                  right: 15, 
-                  top: 15 // Căn chỉnh theo style input của bạn
-                }} 
+                style={{ position: 'absolute', right: 15, top: 15 }} 
                 onPress={() => setShowPassword(!showPassword)}
               >
                 <Ionicons 
@@ -134,7 +127,7 @@ export default function Login({ navigation, setUser }: LoginProps) {
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Đăng nhập</Text>
+                <Text style={styles.buttonText}>{t('auth.login_button')}</Text>
               )}
             </TouchableOpacity>
 
@@ -144,7 +137,8 @@ export default function Login({ navigation, setUser }: LoginProps) {
               disabled={loading}
             >
               <Text style={styles.linkText}>
-                Chưa có tài khoản? <Text style={styles.linkHighlight}>Đăng ký ngay</Text>
+                {t('auth.no_account')}{" "}
+                <Text style={styles.linkHighlight}>{t('auth.register_now')}</Text>
               </Text>
             </TouchableOpacity>
           </View>

@@ -38,7 +38,7 @@ interface User {
   displayName?: string | null;
   photoURL?: string;
   totalMinutes?: number;
-  totalSessions?: number;
+  completedSessions?: number;
   currentStreak?: number;
   isPro?: boolean;
   birthday?: string;
@@ -96,18 +96,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   const theme = isDarkMode ? Colors.dark : Colors.light;
 
-  const completePomodoroSession = async (minutes: number) => {
-    if (!user?.uid) return;
-    try {
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        totalMinutes: increment(minutes),
-        totalSessions: increment(1),
-      });
-    } catch (e) {
-      console.error("Lỗi cập nhật Firestore:", e);
-    }
-  };
 
   // --- 1. KHỞI TẠO APP ---
   useEffect(() => {
@@ -165,7 +153,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     setLoading(true);
-    console.log("Đang lắng nghe task cho UID:", user.uid);
+    // console.log("Đang lắng nghe task cho UID:", user.uid);
 
     const q = query(
       collection(db, "tasks"), 
@@ -184,16 +172,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         } as Task;
       });
       
-      console.log(`Đã cập nhật ${tasks.length} tasks từ ${querySnapshot.metadata.fromCache ? 'Cache' : 'Server'}`);
+      // console.log(`Đã cập nhật ${tasks.length} tasks từ ${querySnapshot.metadata.fromCache ? 'Cache' : 'Server'}`);
       
       setTaskList(tasks);
       
-      // Tắt loading khi đã có dữ liệu (kể cả từ cache)
       setLoading(false);
     }, (error) => {
       console.error("Lỗi Firestore chi tiết:", error);
       setLoading(false);
-      // Nếu lỗi do thiếu Index, Firebase sẽ in ra Link ở đây
     });
 
     return () => unsubscribe();
@@ -204,20 +190,24 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     let unsubscribe: () => void;
 
     if (isLoaded && user?.uid) {
-      console.log("Đang lắng nghe dữ liệu chi tiết cho User:", user.uid);
+      // console.log("Đang lắng nghe dữ liệu chi tiết cho User:", user.uid);
       
       const userDocRef = doc(db, "users", user.uid);
       
       unsubscribe = onSnapshot(userDocRef, (docSnap) => {
         if (docSnap.exists()) {
           const firestoreData = docSnap.data();
-          // Gộp dữ liệu từ Auth (hoặc Cache) với dữ liệu từ Firestore
-          setUser(prev => prev ? { ...prev, ...firestoreData } : null);
-        } else {
-          console.log("User chưa có document trên Firestore, có thể cần khởi tạo.");
+
+          setUser(prev => {
+            if (!prev) return null;
+            // Kiểm tra xem dữ liệu có thực sự khác không để tránh loop vô tận
+            if (prev.completedSessions === firestoreData.completedSessions && 
+                prev.totalMinutes === firestoreData.totalMinutes) {
+              return prev;
+            }
+            return { ...prev, ...firestoreData };
+          });
         }
-      }, (error) => {
-        console.error("Lỗi lắng nghe User Firestore:", error);
       });
     }
 
@@ -229,7 +219,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const taskRef = doc(db, "tasks", id);
       await updateDoc(taskRef, { completed: !currentStatus });
-      setTaskList(prev => prev.map(t => t.id === id ? { ...t, completed: !currentStatus } : t));
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } catch (e) {
       console.error("Lỗi cập nhật trạng thái:", e);
@@ -239,7 +228,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const deleteTask = async (id: string) => {
     try {
       await deleteDoc(doc(db, "tasks", id));
-      setTaskList(prev => prev.filter(t => t.id !== id));
       if (selectedTaskId === id) setSelectedTaskId(null);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     } catch (e) {
@@ -252,9 +240,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const taskRef = doc(db, "tasks", id);
       await updateDoc(taskRef, { pomodoroCount: increment(1) });
-      setTaskList(prev => prev.map(t => 
-        t.id === id ? { ...t, pomodoroCount: (t.pomodoroCount || 0) + 1 } : t
-      ));
     } catch (e) { 
       console.error("Lỗi tăng Pomodoro:", e); 
     }

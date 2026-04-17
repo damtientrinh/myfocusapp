@@ -1,17 +1,26 @@
+import { useAppContext } from '@/context/AppContext';
 import React from 'react';
-import { View, Dimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Dimensions, Text, View } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
-import { useAppContext } from '@/context/AppContext'; 
 import { styles } from './styles';
 
 
 const screenWidth = Dimensions.get('window').width;
 
 export const StatsChart = ({ taskList = [] }: { taskList: any[] }) => {
-  if (!taskList || taskList.length === 0) {
-    return "Chưa có dữ liệu";
-  }
   const { theme, isDarkMode } = useAppContext();
+  const { t } = useTranslation();
+
+  if (!taskList || taskList.length === 0) {
+    return (
+      <View style={{ padding: 20, alignItems: 'center' }}>
+        <Text style={{ color: theme.subText, fontFamily: 'sans-serif' }}>
+          {t('stats.no_data')}
+        </Text>
+      </View>
+    );
+  }
 
   // 1. Tạo mảng 7 ngày gần nhất (từ hôm nay lùi về sau)
   const last7Days = [...Array(7)].map((_, i) => {

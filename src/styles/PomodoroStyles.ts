@@ -53,6 +53,7 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     paddingHorizontal: 20,
     paddingVertical: 12,
+    marginBottom: 10,
     borderRadius: 30, 
     minWidth: 140,
     alignItems: 'center',
@@ -87,7 +88,7 @@ export const styles = StyleSheet.create({
     maxWidth: '90%',
   },
   activeTaskText: {
-    fontSize: 16,
+    fontSize: 12,
     color: '#FFF',
     textAlign: 'center',
     fontFamily: Fonts.rounded,

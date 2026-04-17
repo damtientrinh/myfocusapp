@@ -1,14 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import React, { useEffect, useMemo, useState } from 'react';
+import * as Notifications from 'expo-notifications';
+import { useLocalSearchParams } from 'expo-router';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, TouchableOpacity, View } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { useLocalSearchParams } from 'expo-router';
 
 // Firebase
 import { db } from '@/config/firebaseConfig';
-import { addDoc, collection, doc, increment, serverTimestamp, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, increment, serverTimestamp, updateDoc } from "firebase/firestore";
 
 // Context & Hooks
 import { useAppContext } from '@/context/AppContext';
@@ -27,10 +28,17 @@ import { Colors } from '../constants/theme';
 import { MusicControl } from '../components/common/MusicControl';
 import { useMusicPlayer } from '../hooks/useMusicPlayer';
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true, // Hiện banner thông báo
+    shouldPlaySound: true, // Phát âm thanh
+    shouldSetBadge: false,
+  } as Notifications.NotificationBehavior),
+});
 
 export default function FocusScreen() {
   const { t } = useTranslation();
-  const { taskId } = useLocalSearchParams();
+  const { taskId, roomId } = useLocalSearchParams();
   const { 
     selectedTaskId, setSelectedTaskId, 
     isDarkMode, user, incrementTaskPomodoro } = useAppContext();
@@ -42,12 +50,24 @@ export default function FocusScreen() {
   const { taskList } = useTaskLogic();
   const [showConfetti, setShowConfetti] = useState(false);
 
+  const [roomData, setRoomData] = useState<any>(null);
+
+  const sendLocalNotification = async () => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Hết giờ rồi Bạn ơi! 🍅",
+        body: "Bạn đã hoàn thành một phiên tập trung xuất sắc.",
+        sound: true,
+      },
+      trigger: null, // Gửi ngay lập tức
+    });
+  };
+
   // Đồng bộ Task từ Params ---
   useEffect(() => {
     if (taskId && taskId !== selectedTaskId) {
       setSelectedTaskId(taskId as string);
       
-      // Nếu muốn: Tự động nhấn Start khi vừa bấm "Tập trung" từ màn hình kia
       // setIsActive(true); 
     }
   }, [taskId]);
@@ -82,6 +102,23 @@ export default function FocusScreen() {
     backgroundColor: withTiming(modeColors[0], { duration: 1000 }) 
   }));
 
+  useEffect(() => {
+    if (roomId) {
+      const fetchRoomInfo = async () => {
+        try {
+          const roomRef = doc(db, "rooms", roomId as string);
+          const snap = await getDoc(roomRef);
+          if (snap.exists()) {
+            setRoomData(snap.data());
+          }
+        } catch (e) {
+          console.error("Lỗi lấy thông tin phòng:", e);
+        }
+      };
+      fetchRoomInfo();
+    }
+  }, [roomId]);
+
   // 2. Lưu kết quả
   const savePomodoroSession = async () => {
     if (mode !== 'WORK' || !user) return;
@@ -111,16 +148,36 @@ export default function FocusScreen() {
       setIsActive(false);
       setShowConfetti(true);
       savePomodoroSession();
+      sendLocalNotification();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); 
     }
   }, [time, isActive]);
 
   const progress = time / totalSeconds; // 1 -> 0
 
+  const handleConfettiEnd = useCallback(() => {
+    setShowConfetti(false)
+  }, []);
+
 
   return (
     <Animated.View style={[styles.container, animatedContainer]}>
-      <QuoteDisplay mode={mode} pomodoroCount={pomodoroCount} />
+      {/* <QuoteDisplay mode={mode} pomodoroCount={pomodoroCount} /> */}
+
+      <View style={{ marginTop: 40, alignItems: 'center' }}>
+        {roomData ? (
+          <View style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: 10, borderRadius: 12 }}>
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>
+              🏫 {roomData.name}
+            </Text>
+            <Text style={{ color: '#fff', opacity: 0.8, fontSize: 12, textAlign: 'center' }}>
+              {t('create_room.topic_label')}: {roomData.topic}
+            </Text>
+          </View>
+        ) : (
+          <QuoteDisplay mode={mode} pomodoroCount={pomodoroCount} />
+        )}
+      </View>
       
       <ModeSelector 
         mode={mode} 
@@ -183,11 +240,21 @@ export default function FocusScreen() {
       </View>
 
       <View style={styles.taskInfoArea}>
-        {activeTask && (
+        {activeTask ? (
           <View style={styles.activeTaskBadge}>
             <Text style={styles.activeTaskText}>
               {t('pomodoro.working_on', { task: activeTask.text })}
             </Text>
+          </View>
+        ) : roomData ? (
+          <View style={styles.activeTaskBadge}>
+            <Text style={styles.activeTaskText}>
+              🔥 {t('room_detail.online_members')}: Đang học nhóm
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.activeTaskBadge}>
+            <Text style={styles.activeTaskText}>⏳ {t('pomodoro.modes.work')}</Text>
           </View>
         )}
 
@@ -221,7 +288,7 @@ export default function FocusScreen() {
 
       <SuccessConfetti 
         isActive={showConfetti} 
-        onAnimationEnd={() => setShowConfetti(false)} 
+        onAnimationEnd={() => handleConfettiEnd} 
       />
     </Animated.View>
   );

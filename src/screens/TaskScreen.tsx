@@ -4,26 +4,22 @@ import * as Notifications from 'expo-notifications';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    ActivityIndicator, Alert,
-    FlatList, Keyboard, Platform,
-    RefreshControl,
-    Text, TextInput,
-    TouchableOpacity, View
+  ActivityIndicator, Alert,
+  FlatList, Keyboard,
+  LayoutAnimation,
+  Platform,
+  RefreshControl,
+  Text, TextInput,
+  TouchableOpacity, View
 } from 'react-native';
 import Animated, { FadeInUp, FadeOutDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LayoutAnimation } from 'react-native';
 
 import { EmptyTask } from '../components/task/EmptyTask';
 import { TaskItem } from '../components/task/TaskItem';
 import { useAppContext } from '../context/AppContext';
 import { useTaskLogic } from '../hooks/useTaskLogic';
 import { styles } from '../styles/TaskStyles';
-if (Platform.OS === 'android') {
-  if (require('react-native').UIManager.setLayoutAnimationEnabledExperimental) {
-    require('react-native').UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
-}
 
 
 export default function TaskScreen() {
@@ -32,7 +28,6 @@ export default function TaskScreen() {
     addTask, toggleTask, deleteTask, setToastMsg 
   } = useTaskLogic();
 
-  // ✅ Xóa refreshTasks ở đây vì onSnapshot đã lo việc cập nhật Real-time
   const { theme, isDarkMode, language, setSelectedTaskId, loading } = useAppContext(); 
   const { t } = useTranslation();
 
@@ -41,9 +36,8 @@ export default function TaskScreen() {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const onToggleSafe = (id: string, currentStatus: boolean) => {
-    // LayoutAnimation giúp hiệu ứng mượt hơn khi task nhảy xuống dưới
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    toggleTask(id, currentStatus);
+    toggleTask(id, !currentStatus);
   };
 
   useEffect(() => {
@@ -67,12 +61,10 @@ export default function TaskScreen() {
     };
   }, []);
 
-  // Sắp xếp Task: Chưa hoàn thành lên trước, task mới nhất lên trên
   const sortedTasks = useMemo(() => { 
     if (!taskList) return [];
     return [...taskList].sort((a, b) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
-      // Firebase dùng serverTimestamp nên so sánh chuỗi ISO từ code trước đó
       return (b.createdAt || '').localeCompare(a.createdAt || '');
     });
   }, [taskList]);
@@ -85,7 +77,6 @@ export default function TaskScreen() {
     
     try {
       await addTask(); 
-      // Không cần setTaskText('') ở đây vì trong useTaskLogic đã làm rồi
       Keyboard.dismiss(); 
     } catch (error) {
       console.log("Lỗi thêm task tại Screen:", error);
@@ -107,7 +98,7 @@ export default function TaskScreen() {
               keyExtractor={item => item.id}
               keyboardDismissMode="interactive"
               keyboardShouldPersistTaps="handled" 
-              // ✅ Sửa RefreshControl: Chỉ dùng loading để hiện spinner khi Firestore đang fetch lần đầu
+
               refreshControl={
                 <RefreshControl refreshing={loading} onRefresh={() => {}} tintColor={theme.text} enabled={false} />
               }
@@ -189,7 +180,7 @@ export default function TaskScreen() {
           />
         )}
 
-        {toastMsg !== '' && (
+        {!!toastMsg && (
           <Animated.View 
             entering={FadeInUp} 
             exiting={FadeOutDown}

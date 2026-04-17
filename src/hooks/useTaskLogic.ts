@@ -30,30 +30,24 @@ export const useTaskLogic = () => {
 
   const addTask = async () => {
     if (!taskText.trim()) return;
-
-    // Ưu tiên dùng user từ Context đã được xử lý ổn định
     if (!user?.uid) {
       Alert.alert(t('common.error'), t('tasks.login_required'));
       return;
     }
-
+    
     try {
-      // 1. Chỉ chuẩn bị dữ liệu sạch để đẩy lên Firebase
       const newTask = {
         userId: user.uid, 
         text: taskText.trim(),
         completed: false,
         pomodoroCount: 0,
         reminderDate: date.toISOString(),
-        notificationId: null, // Tạm thời để null hoặc logic thông báo của bạn
-        createdAt: serverTimestamp(), // Để Server tự quyết định thời gian
+        notificationId: null, 
+        createdAt: serverTimestamp(), 
       };
 
-      // 2. Đẩy lên Firebase - Dừng tại đây, không cần setTaskList thủ công
-      // Vì onSnapshot trong AppContext sẽ tự động "ngửi" thấy task mới và cập nhật UI cho bạn
       await addDoc(collection(db, "tasks"), newTask);
 
-      // 3. Dọn dẹp UI local
       setTaskText('');
       setDate(new Date(Date.now() + 10 * 60 * 1000));
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -65,12 +59,20 @@ export const useTaskLogic = () => {
     }
   };
 
-  // Các hàm toggleTask và deleteTask cũng nên bỏ setTaskList thủ công 
-  // để tránh xung đột với Real-time snapshot
-  const toggleTask = async (id: string, currentStatus: boolean) => {
+
+  const toggleTask = async (id: string, forceStatus?: boolean) => {
     try {
       const taskRef = doc(db, "tasks", id);
-      await updateDoc(taskRef, { completed: !currentStatus });
+
+      let nextStatus: boolean;
+      if (forceStatus !== undefined) {
+        nextStatus = forceStatus;
+      } else {
+        const task = taskList.find(t => t.id === id);
+        nextStatus = !task?.completed;
+      }
+
+      await updateDoc(taskRef, { completed: nextStatus });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) { 
       console.error(error); 

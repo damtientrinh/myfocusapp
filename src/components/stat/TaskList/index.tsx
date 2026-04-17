@@ -27,9 +27,8 @@ export const TaskDetailList = ({ taskList, totalPomodoros }: TaskListProps) => {
 
   
   return (
-    <>
+    <View>
       {taskList.map((task, index) => {
-        // Tính phần trăm đóng góp của task này
         const percentage = totalPomodoros > 0 
           ? ( (task.pomodoroCount || 0) / totalPomodoros ) * 100 : 0;
 
@@ -51,7 +50,7 @@ export const TaskDetailList = ({ taskList, totalPomodoros }: TaskListProps) => {
                   styles.progressBarFill, 
                   { 
                     width: `${percentage}%`,
-                    backgroundColor: theme.primary || '#f55656' // Màu đỏ cà chua
+                    backgroundColor: theme.primary || '#f55656' 
                   }
                 ]} 
               />
@@ -59,11 +58,11 @@ export const TaskDetailList = ({ taskList, totalPomodoros }: TaskListProps) => {
             
             {/* Hiển thị phần trăm nhỏ bên dưới (tùy chọn) */}
             <Text style={{ fontSize: 10, color: theme.subText, marginTop: 2, textAlign: 'right' }}>
-               {percentage.toFixed(0)}%
+               {`${percentage.toFixed(0)}%`}
             </Text>
           </View>
         );
       })}
-    </>
+    </View>
   );
 };
