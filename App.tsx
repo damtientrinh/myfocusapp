@@ -15,6 +15,9 @@ import Register from "./src/screens/Register";
 import SettingScreen from '@/screens/SettingScreen';
 import ProfileScreen from "./src/screens/Profile";
 import EditProfileScreen from './src/screens/EditProfileScreen';
+import CreateRoomScreen from './src/screens/CreateRoomScreen';
+import RoomDetailScreen from './src/screens/RoomDetailScreen';
+import FocusScreen from './src/screens/FocusScreen';
 
 const Stack = createNativeStackNavigator();
 LogBox.ignoreLogs(['expo-notifications', 'i18next is made possible', 'expo-av']);
@@ -37,7 +40,24 @@ const MainStack = () => (
       name="MainTabs" 
       component={TabNavigator} 
       options={{ headerShown: false }} 
-    />
+        />
+        <Stack.Screen
+            name="CreateRoom"
+            component={CreateRoomScreen}
+            options={{ title: "Tạo phòng" }}
+        />
+        <Stack.Screen
+            name="RoomDetail"
+            component={RoomDetailScreen}
+            options={{ title: "Phòng" }}
+        />
+
+        {/* 🔥 FIX LỖI NAVIGATE */}
+        <Stack.Screen
+            name="Focus"
+            component={FocusScreen}
+            options={{ title: "Focus" }}
+        />
 
     <Stack.Screen 
       name="Settings" 

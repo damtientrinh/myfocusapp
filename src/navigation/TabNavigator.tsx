@@ -6,6 +6,7 @@ import { BarChart2, ListTodo, Settings, Timer, Users } from 'lucide-react-native
 
 import FocusScreen from '@/screens/FocusScreen';
 import SettingScreen from '@/screens/SettingScreen';
+import RoomsScreen from '@/screens/RoomsScreen';
 import SocialScreen from '@/screens/SocialScreen';
 import StatsScreen from '@/screens/StatsScreen';
 import TaskScreen from '@/screens/TaskScreen';
@@ -74,7 +75,16 @@ export const TabNavigator = memo(() => {
           tabBarLabel: 'Thống kê',
           tabBarIcon: (props) => <TabIcon IconComponent={BarChart2} {...props} />
         }}
-      />
+          />
+          {/* Rooms */}
+          <Tab.Screen
+              name="Rooms"
+              component={RoomsScreen}
+              options={{
+                  tabBarLabel: 'Phòng',
+                  tabBarIcon: (props) => <TabIcon IconComponent={Users} {...props} />
+              }}
+          />
       
       <Tab.Screen 
         name="Social" 

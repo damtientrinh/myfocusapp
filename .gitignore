@@ -1,5 +1,3 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
 # dependencies
 node_modules/
 
@@ -31,18 +29,19 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
 
 # typescript
 *.tsbuildinfo
 
-app-example
-
 # generated native folders
 /ios
 /android
-. v s /  
- . v s / 
-# Firebase Secret Keys
-.env
- 
+
+# VS (Visual Studio)
+.vs/
+
+# optional (nên có thêm)
+build/
+coverage/

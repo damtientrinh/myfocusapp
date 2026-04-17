@@ -1,228 +1,264 @@
-import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Text, TouchableOpacity, View } from 'react-native';
-import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useMemo, useState } from "react";
+import {
+    View,
+    Text,
+    TouchableOpacity
+} from "react-native";
+import * as Haptics from "expo-haptics";
+import { useRoute } from "@react-navigation/native";
 
 // Firebase
-import { db } from '@/config/firebaseConfig';
+import { db } from "@/config/firebaseConfig";
 import { addDoc, collection, doc, increment, serverTimestamp, updateDoc } from "firebase/firestore";
 
-// Context & Hooks
-import { useAppContext } from '@/context/AppContext';
-import { usePomodoro } from '../hooks/usePomodoro';
-import { useTaskLogic } from '../hooks/useTaskLogic';
+// Realtime
+import { updateUserStatus } from "@/api/rooms";
 
-// Components
-import { SuccessConfetti } from '@/components/common/SuccessConfetti';
-import { GradientLoader } from '@/components/pomodoro/GradientLoader';
-import { ModeSelector } from '@/components/pomodoro/ModeSelector';
-import { QuoteDisplay } from '@/components/pomodoro/Quotes';
-import { styles } from '@/styles/PomodoroStyles';
-
-import { Colors } from '../constants/theme';
-
-import { MusicControl } from '../components/common/MusicControl';
-import { useMusicPlayer } from '../hooks/useMusicPlayer';
-
+// Context + Hooks
+import { useAppContext } from "@/context/AppContext";
+import { usePomodoro } from "../hooks/usePomodoro";
+import { useTaskLogic } from "../hooks/useTaskLogic";
 
 export default function FocusScreen() {
-  const { t } = useTranslation();
-  const { taskId } = useLocalSearchParams();
-  const { 
-    selectedTaskId, setSelectedTaskId, 
-    isDarkMode, user, incrementTaskPomodoro } = useAppContext();
-  const { 
-    time, isActive, mode, pomodoroCount, setIsActive, changeMode, 
-    formatTime, totalSeconds, handleFinishTask,
-  } = usePomodoro();
+    const route = useRoute();
+    const roomId = route?.params?.roomId || null;
 
-  const { taskList } = useTaskLogic();
-  const [showConfetti, setShowConfetti] = useState(false);
+    const { user, incrementTaskPomodoro } = useAppContext();
+    const { taskList } = useTaskLogic();
 
-  // Đồng bộ Task từ Params ---
-  useEffect(() => {
-    if (taskId && taskId !== selectedTaskId) {
-      setSelectedTaskId(taskId as string);
-      
-      // Nếu muốn: Tự động nhấn Start khi vừa bấm "Tập trung" từ màn hình kia
-      // setIsActive(true); 
-    }
-  }, [taskId]);
+    const {
+        time,
+        isActive,
+        mode,
+        setIsActive,
+        changeMode,
+        formatTime,
+        totalSeconds
+    } = usePomodoro();
 
-  const activeTask = useMemo(() => 
-    taskList.find(t => t.id === (taskId || selectedTaskId)), 
-  [taskList, selectedTaskId]);
+    const [activeTask] = useState(taskList[0]);
+    const [pomodoroCount, setPomodoroCount] = useState(0);
 
-  const { isMuted, setIsMuted, nextTrack, currentTrackTitle } = useMusicPlayer(isActive);
+    // 🔥 SAVE SESSION
+    const saveSession = async () => {
+        if (!user || mode !== "WORK") return;
 
-  // 1. Logic màu sắc dạng Mảng [Màu chính, Màu phụ] cho Gradient
-  const modeColors: [string, string] = useMemo(() => {
-    const theme = isDarkMode ? Colors.dark : Colors.light;
+        await addDoc(collection(db, "sessions"), {
+            userId: user.uid,
+            userName: user.name || "User",
+            duration: Math.floor(totalSeconds / 60),
+            createdAt: serverTimestamp()
+        });
 
-    switch (mode) {
-      case 'WORK':
-        return [theme.primary, theme.accentGradient]; 
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+            totalMinutes: increment(Math.floor(totalSeconds / 60))
+        });
 
-      case 'SHORT_BREAK':
-        return [theme.secondary, theme.longBreakGradient];
+        setPomodoroCount(p => p + 1);
+    };
 
-      case 'LONG_BREAK':
-        return [theme.longBreak, theme.primaryGradient];
+    // 🔥 TIMER END
+    useEffect(() => {
+        if (time === 0 && isActive) {
+            setIsActive(false);
+            saveSession();
 
-      default:
-        return [theme.primary, theme.accent];
-    }
-  }, [mode, isDarkMode]);
+            if (roomId && user) {
+                updateUserStatus(roomId, user.uid, "idle", 0);
+            }
 
-  // Màu nền Container (Lấy màu đầu tiên trong mảng)
-  const animatedContainer = useAnimatedStyle(() => ({
-    backgroundColor: withTiming(modeColors[0], { duration: 1000 }) 
-  }));
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+    }, [time]);
 
-  // 2. Lưu kết quả
-  const savePomodoroSession = async () => {
-    if (mode !== 'WORK' || !user) return;
-    try {
-      const currentTaskText = activeTask?.text || "Tập trung tự do";
-      const currentTaskId = activeTask?.id || selectedTaskId;
+    // 🔥 realtime
+    useEffect(() => {
+        if (!roomId || !user) return;
 
-      await addDoc(collection(db, "sessions"), {
-        userId: user.uid,
-        userName: user.name || "User",
-        taskText: activeTask?.text || "Tập trung tự do",
-        duration: Math.floor(totalSeconds / 60), 
-        createdAt: serverTimestamp(),
-      });
+        if (isActive) {
+            updateUserStatus(
+                roomId,
+                user.uid,
+                mode === "WORK" ? "studying" : "break",
+                time
+            );
+        } else {
+            updateUserStatus(roomId, user.uid, "idle", 0);
+        }
+    }, [isActive, time, mode]);
 
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, { 
-        totalMinutes: increment(Math.floor(totalSeconds / 60)) 
-      });
-      
-      if (currentTaskId) incrementTaskPomodoro(currentTaskId);
-    } catch (error) { console.error("Lỗi lưu dữ liệu:", error); }
-  };
-  
-  useEffect(() => {
-    if (time === 0 && isActive) {
-      setIsActive(false);
-      setShowConfetti(true);
-      savePomodoroSession();
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); 
-    }
-  }, [time, isActive]);
+    return (
+        <View style={{
+            flex: 1,
+            backgroundColor: "#f76c6c",
+            alignItems: "center",
+            paddingTop: 60
+        }}>
 
-  const progress = time / totalSeconds; // 1 -> 0
-
-
-  return (
-    <Animated.View style={[styles.container, animatedContainer]}>
-      <QuoteDisplay mode={mode} pomodoroCount={pomodoroCount} />
-      
-      <ModeSelector 
-        mode={mode} 
-        changeMode={changeMode} 
-        accentColors={modeColors}
-        labels={{
-          WORK: t('pomodoro.modes.work'),
-          SHORT_BREAK: t('pomodoro.modes.short_break'),
-          LONG_BREAK: t('pomodoro.modes.long_break')
-        }}
-      />
-      
-      <View style={styles.circleContainer}>
-        <GradientLoader 
-          isActive={isActive} 
-          progress={progress} 
-          colors={modeColors} 
-          isDarkMode={isDarkMode}
-        />
-        <View style={[
-          styles.innerCircle, 
-          { 
-            backgroundColor: isDarkMode ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.1)',
-            borderWidth: 1,
-            borderColor: 'rgba(255,255,255,0.2)'
-          }
-        ]}>
-          <Text style={styles.timeText}>{formatTime(time)}</Text>
-          <Text style={{ color: '#fff', opacity: 0.6, fontSize: 12, fontWeight: '600' }}>
-            {mode === 'WORK' ? 'FOCUS' : 'REST'}
-          </Text>
-        </View>
-      </View>
-
-      
-      <View style={styles.buttonRow}>
-        <TouchableOpacity 
-          style={styles.button} 
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            setIsActive(!isActive);
-          }}
-        >
-          {/* <Ionicons name={isActive ? "pause" : "play"} size={24} color={modeColors[0]} /> */}
-          <Text style={[styles.buttonText, { color: modeColors[0] }]}>
-            {isActive ? t('pomodoro.pause') : t('pomodoro.start')}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.button, { backgroundColor: 'rgba(255,255,255,0.2)' }]} 
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setIsActive(false); 
-            changeMode(mode); 
-          }}
-        >
-          <Text style={[styles.buttonText, { color: '#fff' }]}>{t('pomodoro.reset')}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.taskInfoArea}>
-        {activeTask && (
-          <View style={styles.activeTaskBadge}>
-            <Text style={styles.activeTaskText}>
-              {t('pomodoro.working_on', { task: activeTask.text })}
+            {/* QUOTE */}
+            <Text style={{
+                color: "#fff",
+                opacity: 0.8,
+                fontStyle: "italic",
+                marginBottom: 20
+            }}>
+                “Một Pomodoro mỗi ngày, Bug tự khắc bay xa 🐞”
             </Text>
-          </View>
-        )}
 
-        {selectedTaskId && (
-          <TouchableOpacity 
-            style={styles.finishTaskBtn} 
-            onPress={() => handleFinishTask(() => setShowConfetti(true))}
-          >
-            <Ionicons name="checkmark-done" size={20} color='#7ee794' />
-            <Text style={styles.activeTaskText}>{t('pomodoro.finish_task')}</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+            {/* MODE */}
+            <View style={{
+                flexDirection: "row",
+                backgroundColor: "#f4a3a3",
+                borderRadius: 25,
+                padding: 4,
+                marginBottom: 25
+            }}>
+                {["WORK", "SHORT_BREAK", "LONG_BREAK"].map(m => (
+                    <TouchableOpacity
+                        key={m}
+                        onPress={() => changeMode(m as any)}
+                        style={{
+                            paddingHorizontal: 18,
+                            paddingVertical: 8,
+                            borderRadius: 20,
+                            backgroundColor: mode === m ? "#ffb347" : "transparent"
+                        }}
+                    >
+                        <Text style={{ color: "#fff", fontWeight: "600" }}>
+                            {m === "WORK" ? "Tập trung" :
+                                m === "SHORT_BREAK" ? "Nghỉ ngắn" : "Nghỉ dài"}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
 
-      <View style={{ marginVertical: 10, alignItems: 'center' }}>
-        <MusicControl 
-          isMuted={isMuted}
-          setIsMuted={setIsMuted}
-          nextTrack={nextTrack}
-          title={currentTrackTitle}
-          isDarkMode={isDarkMode}
-          isActive={isActive}
-        />
-      </View>
+            {/* TIMER CIRCLE */}
+            <View style={{
+                width: 260,
+                height: 260,
+                borderRadius: 130,
+                backgroundColor: "#d97b5f",
+                justifyContent: "center",
+                alignItems: "center",
+                shadowColor: "#000",
+                shadowOpacity: 0.3,
+                shadowRadius: 12,
+                marginBottom: 25
+            }}>
+                <Text style={{
+                    fontSize: 55,
+                    color: "#fff",
+                    fontWeight: "bold"
+                }}>
+                    {formatTime(time)}
+                </Text>
 
-      <View style={styles.statsContainer}>
-        <Text style={styles.statsText}>
-          {t('pomodoro.sessions', { count: pomodoroCount })}
-        </Text>
-      </View>
+                <Text style={{
+                    color: "#fff",
+                    opacity: 0.7,
+                    marginTop: 5
+                }}>
+                    {mode === "WORK" ? "FOCUS" : "REST"}
+                </Text>
+            </View>
 
-      <SuccessConfetti 
-        isActive={showConfetti} 
-        onAnimationEnd={() => setShowConfetti(false)} 
-      />
-    </Animated.View>
-  );
+            {/* BUTTONS */}
+            <View style={{
+                flexDirection: "row",
+                marginBottom: 15
+            }}>
+                <TouchableOpacity
+                    style={{
+                        backgroundColor: "#fff",
+                        paddingHorizontal: 20,
+                        paddingVertical: 10,
+                        borderRadius: 25,
+                        marginRight: 10
+                    }}
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        setIsActive(!isActive);
+                    }}
+                >
+                    <Text style={{
+                        color: "#f76c6c",
+                        fontWeight: "bold"
+                    }}>
+                        {isActive ? "DỪNG" : "BẮT ĐẦU"}
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={{
+                        backgroundColor: "#e57373",
+                        paddingHorizontal: 20,
+                        paddingVertical: 10,
+                        borderRadius: 25
+                    }}
+                    onPress={() => {
+                        setIsActive(false);
+                        changeMode(mode);
+                    }}
+                >
+                    <Text style={{ color: "#fff" }}>
+                        LÀM MỚI
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
+            {/* TASK */}
+            <View style={{
+                backgroundColor: "#ff8a80",
+                padding: 10,
+                borderRadius: 20,
+                marginTop: 10
+            }}>
+                <Text style={{ color: "#fff" }}>
+                    🚀 Đang làm: {activeTask?.text || "Học Spanish"}
+                </Text>
+            </View>
+
+            {/* DONE BUTTON */}
+            <TouchableOpacity
+                style={{
+                    backgroundColor: "#d66",
+                    padding: 12,
+                    borderRadius: 20,
+                    marginTop: 10
+                }}
+            >
+                <Text style={{ color: "#fff" }}>
+                    ✔ Xong việc này
+                </Text>
+            </TouchableOpacity>
+
+            {/* MUSIC */}
+            <View style={{
+                marginTop: 20,
+                backgroundColor: "#333",
+                paddingHorizontal: 20,
+                paddingVertical: 10,
+                borderRadius: 20
+            }}>
+                <Text style={{ color: "#fff" }}>
+                    🎵 Morning Chill
+                </Text>
+            </View>
+
+            {/* STATS */}
+            <View style={{
+                marginTop: 20,
+                backgroundColor: "#ff9a9a",
+                paddingHorizontal: 20,
+                paddingVertical: 8,
+                borderRadius: 20
+            }}>
+                <Text style={{ color: "#fff" }}>
+                    Số phiên: {pomodoroCount}
+                </Text>
+            </View>
+
+        </View>
+    );
 }
