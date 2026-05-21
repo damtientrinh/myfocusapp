@@ -25,7 +25,7 @@ export const updateUserFocusTime = async (minutes: number) => {
     // 2. Thực hiện ghi dữ liệu ngay lập tức
     await updateDoc(userRef, {
       totalMinutes: increment(minutes),      
-      completedSessions: increment(1),       
+      totalSessions: increment(1),       
       lastDayActive: todayStr,               
       lastWeekActive: currentWeek,           
       lastMonthActive: currentMonth,         

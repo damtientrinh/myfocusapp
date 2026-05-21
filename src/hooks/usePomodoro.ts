@@ -9,9 +9,9 @@ import { useSharedValue } from 'react-native-reanimated';
 import { useTaskLogic } from './useTaskLogic';
 
 export const MODES = {
-  WORK: 25 * 1,
-  SHORT_BREAK: 5 * 1,
-  LONG_BREAK: 15 * 1,
+  WORK: 25 * 60,
+  SHORT_BREAK: 5 * 60,
+  LONG_BREAK: 15 * 60,
 };
 
 export const usePomodoro = () => {
@@ -23,12 +23,14 @@ export const usePomodoro = () => {
   const { toggleTask } = useTaskLogic();
   const { t } = useTranslation();
 
+  const getWorkSeconds = () => customWorkTime < 60 ? customWorkTime * 60 : customWorkTime;
+
   const [time, setTime] = useState(customWorkTime * 1);
   const [isActive, setIsActive] = useState(false);
   const [mode, setMode] = useState<'WORK' | 'SHORT_BREAK' | 'LONG_BREAK'>('WORK');
   const [pomodoroCount, setPomodoroCount] = useState(0);
   const colorProgress = useSharedValue(0);
-  const [totalSeconds, setTotalSeconds] = useState(customWorkTime * 1);
+  const [totalSeconds, setTotalSeconds] = useState(getWorkSeconds());
 
   // 1. Hàm đổi chế độ (Dùng cho ModeSelector)
   const changeMode = (newMode: keyof typeof MODES) => {
@@ -60,41 +62,42 @@ export const usePomodoro = () => {
 
     if (isActive && time > 0) {
       interval = setInterval(() => {
-        setTime((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 1;
-        });
+        setTime((prev) => prev - 1);
       }, 1000);
-    } 
+    } else if ( time === 0 && isActive) {
+      handlePhaseEnd();
+    }
 
-    return () => clearInterval(interval);
-  }, [isActive]); 
+    return () => {
+      if (interval) clearInterval(interval)
+    };
+  }, [isActive, time]); 
 
   // 4. Xử lý logic khi đồng hồ về 0
-  useEffect(() => {
-    if (time === 0 && isActive) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      
-      const finishPhase = async () => {
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: mode === 'WORK' ? t('pomodoro.work_done') : t('pomodoro.break_done'),
-            body: mode === 'WORK' ? t('pomodoro.work_body') : t('pomodoro.break_body'),
-            sound: true,
-          },
-          trigger: null,
-        });
+  const handlePhaseEnd = async () => {
+    setIsActive(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: mode === 'WORK' ? t('pomodoro.work_done') : t('pomodoro.break_done'),
+        body: mode === 'WORK' ? t('pomodoro.work_body') : t('pomodoro.break_body'),
+        sound: true,
+      },
+      trigger: null,
+    });
 
         if (mode === 'WORK') {
-          const minutesEarned = Math.floor((customWorkTime * 1) / 60);
+          const minutesEarned = Math.max(1, Math.floor(totalSeconds / 60));
           
           // Gửi lên Firebase
           try {
-             await updateUserFocusTime(25);
-             console.log("Đã cập nhật bảng xếp hạng thành công!");
+             await updateUserFocusTime(minutesEarned);
+
+             if (selectedTaskId) {
+              await incrementTaskPomodoro(selectedTaskId);
+             }
+            console.log(`Đã cập nhật thành công ${minutesEarned} phút lên BXH!`);
           } catch (error) {
              console.error("Lỗi cập nhật xếp hạng:", error);
           }
@@ -108,17 +111,12 @@ export const usePomodoro = () => {
         }
       };
 
-      finishPhase();
-    }
-  }, [time, isActive]);
-
   // 5. Hàm hoàn thành Task thủ công (Nút tích xanh)
   const handleFinishTask = async (onSuccess?: () => void) => {
     if (!selectedTaskId) return;
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-    
     const secondsWorked = totalSeconds - time; 
     const minutesToUpdate = Math.max(1, Math.floor(secondsWorked / 60)); 
 
@@ -127,7 +125,7 @@ export const usePomodoro = () => {
     setIsActive(false);
 
     // Reset thời gian
-    const resetTime = mode === 'WORK' ? customWorkTime * 1 : MODES[mode];
+    const resetTime = mode === 'WORK' ? getWorkSeconds() : MODES[mode];
     setTime(resetTime);
     setTotalSeconds(resetTime);
 
@@ -136,10 +134,10 @@ export const usePomodoro = () => {
         // 1. Cập nhật trạng thái Task
         await toggleTask(targetId, true);
 
-        // 2. Phải gọi cập nhật điểm ở đây thì BXH mới nhảy
+        // 2. Cập nhật số phút thực tế làm được tính tới thời điểm bấm nút tích
         if (mode === 'WORK') {
-           await updateUserFocusTime(1); // Hoặc truyền minutesToUpdate vào
-           console.log("Đã cập nhật điểm từ nút hoàn thành Task!");
+           await updateUserFocusTime(minutesToUpdate); 
+           console.log(`Đã cập nhật ${minutesToUpdate} phút từ nút tích xanh!`);
         }
 
         if (onSuccess) onSuccess();

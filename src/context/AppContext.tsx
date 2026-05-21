@@ -9,11 +9,7 @@ import { Alert } from 'react-native';
 import { auth, db } from '@/config/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import {
-  collection,
-  deleteDoc,
-  doc,
-  increment,
-  onSnapshot,
+  collection, deleteDoc, doc, increment, onSnapshot,
   query, updateDoc, where, writeBatch
 } from "firebase/firestore";
 
@@ -38,7 +34,7 @@ interface User {
   displayName?: string | null;
   photoURL?: string;
   totalMinutes?: number;
-  completedSessions?: number;
+  totalSessions?: number;
   currentStreak?: number;
   isPro?: boolean;
   birthday?: string;
@@ -54,7 +50,6 @@ interface AppContextType {
   setSelectedTaskId: (id: string | null) => void;
   
   // Task Actions
-  // addTask: (text: string) => Promise<void>;
   toggleTaskComplete: (id: string, currentStatus: boolean) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   incrementTaskPomodoro: (id: string) => Promise<void>;
@@ -146,7 +141,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // --- 3. QUẢN LÝ TASKS REAL-TIME TỪ FIREBASE ---
   useEffect(() => {
-    // Chỉ chạy khi đã load xong dữ liệu từ AsyncStorage và có user
     if (!isLoaded || !user?.uid) {
       if (isLoaded && !user) setTaskList([]);
       return;
@@ -161,7 +155,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       // orderBy("createdAt", "desc")
     );
 
-    // Thêm option { includeMetadataChanges: true } để bắt được dữ liệu từ Cache
     const unsubscribe = onSnapshot(q, { includeMetadataChanges: true }, (querySnapshot) => {
       const tasks = querySnapshot.docs.map(doc => {
         const data = doc.data();
@@ -175,7 +168,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       // console.log(`Đã cập nhật ${tasks.length} tasks từ ${querySnapshot.metadata.fromCache ? 'Cache' : 'Server'}`);
       
       setTaskList(tasks);
-      
       setLoading(false);
     }, (error) => {
       console.error("Lỗi Firestore chi tiết:", error);
@@ -191,7 +183,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (isLoaded && user?.uid) {
       // console.log("Đang lắng nghe dữ liệu chi tiết cho User:", user.uid);
-      
       const userDocRef = doc(db, "users", user.uid);
       
       unsubscribe = onSnapshot(userDocRef, (docSnap) => {
@@ -201,8 +192,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(prev => {
             if (!prev) return null;
             // Kiểm tra xem dữ liệu có thực sự khác không để tránh loop vô tận
-            if (prev.completedSessions === firestoreData.completedSessions && 
-                prev.totalMinutes === firestoreData.totalMinutes) {
+            if (prev.totalSessions === firestoreData.totalSessions && 
+                prev.totalMinutes === firestoreData.totalMinutes &&
+                prev.displayName === firestoreData.displayName && 
+                prev.photoURL === firestoreData.photoURL) {
               return prev;
             }
             return { ...prev, ...firestoreData };
@@ -273,19 +266,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refreshTasks = async () => {
     setLoading(true);
-    // Thực tế onSnapshot sẽ tự lo, nhưng việc set loading này giúp UI hiện Feedback 
-    // khi người dùng cố tình muốn "kiểm tra" lại dữ liệu.
-    setTimeout(() => setLoading(false), 500); 
+    await new Promise(resolve => setTimeout(resolve, 300));
+    setLoading(false); 
   };
 
   const logout = async () => {
     try {
-      // 2. PHẢI CÓ DÒNG NÀY để Firebase thực sự đăng xuất
       await signOut(auth);
-      // Xóa trắng cả cài đặt nếu muốn sạch sẽ hoàn toàn
       await AsyncStorage.removeItem('@user_data'); 
 
-      // 3. Sau đó mới dọn dẹp local data
       setUser(null);
       setTaskList([]);
       setSelectedTaskId(null);
@@ -308,30 +297,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AppContext.Provider value={{ 
-      taskList, 
-      setTaskList, 
-      selectedTaskId, 
-      setSelectedTaskId,
-      toggleTaskComplete, 
-      deleteTask,
-      incrementTaskPomodoro, 
-      clearAllTasks, 
-      refreshTasks: async () => { setLoading(true); setTimeout(()=>setLoading(false), 300); }, 
-      theme, 
-      fonts: Fonts, 
-      spacing: Spacing, 
-      isDarkMode, 
-      setIsDarkMode,
-      customWorkTime, 
-      setCustomWorkTime, 
-      language, 
-      setLanguage, 
-      resetSettings,
-      user, 
-      setUser, 
-      logout, 
-      loading, 
-      isLoaded
+      taskList,  setTaskList, selectedTaskId, setSelectedTaskId,
+      toggleTaskComplete, deleteTask, incrementTaskPomodoro, 
+      clearAllTasks, refreshTasks,
+      theme, fonts: Fonts, spacing: Spacing, 
+      isDarkMode, setIsDarkMode, customWorkTime, setCustomWorkTime, 
+      language, setLanguage, resetSettings, user, setUser, 
+      logout, loading, isLoaded
     }}>
       {children}
     </AppContext.Provider>

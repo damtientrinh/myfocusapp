@@ -15,7 +15,6 @@ export const getTopRankings = async (filterType: 'today' | 'weekly' | 'month') =
 
     let filterField = "lastMonthActive";
     let filterValue = currentMonth;
-    // let sortField = "completedSessions";
 
     if (filterType === 'today') {
       filterField = "lastDayActive";
@@ -30,14 +29,14 @@ export const getTopRankings = async (filterType: 'today' | 'weekly' | 'month') =
     const q = query(
       usersRef, 
       where(filterField, "==", filterValue),
-      orderBy("completedSessions", "desc"), 
+      orderBy("totalSessions", "desc"), 
       limit(10)
     );
 
     let snapshot = await getDocs(q);
     
     if (snapshot.empty) {
-      const qAll = query(usersRef, orderBy("completedSessions", "desc"), limit(10));
+      const qAll = query(usersRef, orderBy("totalSessions", "desc"), limit(10));
       snapshot = await getDocs(qAll);
     }
     
@@ -47,7 +46,7 @@ export const getTopRankings = async (filterType: 'today' | 'weekly' | 'month') =
         id: doc.id, 
         ...data,
         displayName: data.displayName || data.email?.split('@')[0] || "User",
-        completedSessions: data.completedSessions || 0,
+        totalSessions: data.totalSessions || 0,
         photoURL: data.photoURL || null
       };
     });

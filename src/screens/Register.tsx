@@ -1,12 +1,12 @@
-﻿import React, { useState } from "react";
-import { 
-  ActivityIndicator, Alert, KeyboardAvoidingView, 
-  Platform, ScrollView, Text, TextInput, 
-  TouchableOpacity, View 
+﻿import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next"; // 1. Thêm đa ngôn ngữ
+import {
+  ActivityIndicator, Alert, KeyboardAvoidingView,
+  Platform, ScrollView, Text, TextInput,
+  TouchableOpacity, View
 } from "react-native";
 import { authStyles as styles } from "../styles/authStyles";
-import { Ionicons } from '@expo/vector-icons';
-import { useTranslation } from "react-i18next"; // 1. Thêm đa ngôn ngữ
 
 // Firebase
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -46,13 +46,23 @@ export default function Register({ navigation }: any) {
       const userCredential = await createUserWithEmailAndPassword(auth, cleanEmail, password);
       const user = userCredential.user;
 
+      const now = new Date();
+      const todayStr = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+      const currentMonth = `${now.getMonth() + 1}-${now.getFullYear()}`;
+      const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
+      const pastDaysOfYear = (now.getTime() - firstDayOfYear.getTime()) / 86400000;
+      const currentWeek = `${Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7)}-${now.getFullYear()}`;
+
       // Lưu thông tin user vào Firestore
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         createdAt: new Date().toISOString(),
-        totalPomodoro: 0,
+        totalMinutes: 0,
+        totalSessions: 0,
+        lastDayActive: todayStr,  
+        lastMonthActive: currentMonth,
         displayName: t('auth.new_member'),
-        photoURL: null // Thêm sẵn để sau này làm Profile
+        photoURL: null 
       });
 
       setLoading(false);

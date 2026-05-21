@@ -2,6 +2,7 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "rootDir": ".",
     "paths": {
       "@/*": [
         "./src/*"
@@ -12,6 +13,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "src/config/firebaseConfig.js"  ]
+    "expo-env.d.ts", 
+    "src/config/firebaseConfig.js"  
+  ]
 }

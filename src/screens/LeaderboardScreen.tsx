@@ -3,7 +3,10 @@ import { styles } from '@/styles/LeaderboardStyles';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, FlatList, Image, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator, FlatList, Image, RefreshControl,
+  Text, TouchableOpacity, View
+} from 'react-native';
 
 
 export default function LeaderboardScreen() {
@@ -69,7 +72,7 @@ export default function LeaderboardScreen() {
         </View>
 
         <View style={styles.scoreContainer}>
-          <Text style={styles.scoreValue}>{item.completedSessions || 0}</Text>
+          <Text style={styles.scoreValue}>{item.totalSessions || 0}</Text>
           <Text style={styles.scoreUnit}>{t('leaderboard.sessions_unit')}</Text>
         </View>
       </View>
